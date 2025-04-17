@@ -9,7 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/full_width_button.dart';
 import '../../controllers/event_controller.dart';
-import '../widgets/create_venue_appbar.dart';
+import '../../screens/widgets/create_venue_appbar.dart';
 
 class EventImageUpload extends ConsumerStatefulWidget {
   final String eventId;

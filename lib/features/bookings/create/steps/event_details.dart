@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/full_width_button.dart';
 import '../../controllers/event_controller.dart';
-import '../widgets/create_venue_appbar.dart';
+import '../../screens/widgets/create_venue_appbar.dart';
 
 class EventDetails extends ConsumerStatefulWidget {
   final String eventId;

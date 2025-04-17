@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/full_width_button.dart';
 import '../../controllers/event_controller.dart';
-import '../widgets/create_venue_appbar.dart';
+import '../../screens/widgets/create_venue_appbar.dart';
 
 class EventTypeSelection extends ConsumerStatefulWidget {
   final String eventId;
@@ -18,11 +18,12 @@ class EventTypeSelection extends ConsumerStatefulWidget {
 class _EventTypeSelectionState extends ConsumerState<EventTypeSelection> {
   String selectedEventType = '';
   final List<Map<String, dynamic>> eventTypes = [
-    {'name': 'Dinner', 'icon': Icons.dinner_dining},
-    {'name': 'Drinks', 'icon': Icons.local_bar},
-    {'name': 'Party', 'icon': Icons.celebration},
-    {'name': 'Business', 'icon': Icons.business},
-    {'name': 'Other', 'icon': Icons.more_horiz},
+    {'name': 'Dating', 'image': 'assets/dating.png'},
+    {'name': 'Workshop', 'image': 'assets/workshop.png'},
+    {'name': 'Meetup', 'image': 'assets/meetup.png'},
+    {'name': 'Lunch', 'image': 'assets/lunch.png'},
+    {'name': 'Coffee Time', 'image': 'assets/coffee_time.png'},
+    {'name': 'Other', 'image': 'assets/other.png'},
   ];
 
   @override
@@ -34,12 +35,12 @@ class _EventTypeSelectionState extends ConsumerState<EventTypeSelection> {
         },
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'What type of event?',
+              'What is the type of the event?',
               style: TextStyle(
                 color: AppColors.primaryWhite,
                 fontSize: 28.0,
@@ -53,7 +54,7 @@ class _EventTypeSelectionState extends ConsumerState<EventTypeSelection> {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
-                  childAspectRatio: 1.3,
+                  // childAspectRatio: 1.3,
                 ),
                 itemCount: eventTypes.length,
                 itemBuilder: (context, index) {
@@ -69,43 +70,37 @@ class _EventTypeSelectionState extends ConsumerState<EventTypeSelection> {
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12.0),
-                        color:
-                            isSelected
-                                ? AppColors.primaryPink
-                                : AppColors.secondaryBackground,
+                        image: DecorationImage(image: AssetImage(eventType['image']),
+                            colorFilter: ColorFilter.mode(Colors.black.withValues(alpha: 0.6), BlendMode.darken),
+                            fit: BoxFit.cover),
                         border: Border.all(
                           color:
                               isSelected
                                   ? AppColors.primaryPink
                                   : AppColors.grayBorder,
-                          width: 1.0,
+                          width: 3.0,
                         ),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            eventType['icon'],
-                            color: AppColors.primaryWhite,
-                            size: 40.0,
-                          ),
-                          const SizedBox(height: 8.0),
-                          Text(
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text(
                             eventType['name'],
                             style: const TextStyle(
                               color: AppColors.primaryWhite,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
                   );
                 },
               ),
             ),
-            const Spacer(),
+            // const Spacer(),
             FullWidthButton(
               name: 'Next',
               onPressed: selectedEventType.isEmpty ? () {} : _saveEventType,

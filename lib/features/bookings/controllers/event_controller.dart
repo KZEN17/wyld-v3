@@ -121,14 +121,16 @@ class EventController extends StateNotifier<AsyncValue<List<EventModel>>> {
   }
 
   // Upload event images
+
   Future<List<String>> uploadEventImages(
-    String eventId,
-    List<File> imageFiles,
-  ) async {
+      String eventId,
+      List<File> imageFiles,
+      ) async {
     try {
+      // Fix the parameter order here
       final imageUrls = await _eventRepository.uploadEventImages(
-        imageFiles,
-        eventId,
+        imageFiles,  // First parameter - list of image files
+        eventId,     // Second parameter - the event ID
       );
       // Refresh events list
       getEvents();

@@ -7,7 +7,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/full_width_button.dart';
 import '../../../auth/screens/widgets/section_title.dart';
 import '../../controllers/event_controller.dart';
-import '../widgets/create_venue_appbar.dart';
+import '../../screens/widgets/create_venue_appbar.dart';
 
 class EventDateTime extends ConsumerStatefulWidget {
   final String eventId;

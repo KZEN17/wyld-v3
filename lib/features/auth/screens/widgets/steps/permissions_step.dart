@@ -368,16 +368,11 @@ class _PermissionsStepState extends ConsumerState<PermissionsStep> {
                                 width: MediaQuery.of(context).size.width,
                                 height: 175.0,
                                 decoration: BoxDecoration(
+                                  image: DecorationImage(image: AssetImage('assets/permissions.png')),
                                   color: AppColors.secondaryBackground,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Center(
-                                  child: Icon(
-                                    Icons.image,
-                                    size: 50,
-                                    color: AppColors.secondaryWhite,
-                                  ),
-                                ),
+                        
                               ),
                               const SizedBox(height: 20),
                               ListTile(

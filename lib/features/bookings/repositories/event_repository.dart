@@ -203,10 +203,11 @@ class EventRepository {
   }
 
   // Upload event images
+
   Future<List<String>> uploadEventImages(
-    List<File> imageFiles,
-    String userId,
-  ) async {
+      List<File> imageFiles,
+      String eventId,
+      ) async {
     final List<String> imageUrls = [];
 
     for (var imageFile in imageFiles) {
@@ -220,14 +221,30 @@ class EventRepository {
           ),
         );
 
-        // CORRECT WAY: Build the URL string directly instead of using toString()
+        // Build the URL string directly instead of using toString()
         final String fileUrl =
-            '${AppwriteConstants.endpoint}/storage/buckets/${AppwriteConstants.imagesBucket}/files/${uploadedFile.$id}/preview?project=${AppwriteConstants.projectId}';
+            '${AppwriteConstants.endpoint}/storage/buckets/${AppwriteConstants.eventImagesBucket}/files/${uploadedFile.$id}/preview?project=${AppwriteConstants.projectId}';
 
         imageUrls.add(fileUrl);
       } catch (e) {
         if (kDebugMode) {
           print('Error uploading image: $e');
+        }
+      }
+    }
+
+    // Update the event document with the new image URLs
+    if (imageUrls.isNotEmpty) {
+      try {
+        await _db.updateDocument(
+          databaseId: AppwriteConstants.databaseId,
+          collectionId: AppwriteConstants.eventsCollection,
+          documentId: eventId,
+          data: {'venueImages': imageUrls},
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print('Error updating event with image URLs: $e');
         }
       }
     }

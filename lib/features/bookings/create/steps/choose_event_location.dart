@@ -10,7 +10,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/full_width_button.dart';
 import '../../../auth/screens/widgets/section_title.dart';
 import '../../controllers/event_controller.dart';
-import '../widgets/create_venue_appbar.dart';
+import '../../screens/widgets/create_venue_appbar.dart';
 
 class ChooseEventLocation extends ConsumerStatefulWidget {
   final String eventId;
@@ -26,10 +26,12 @@ class _ChooseEventLocationState extends ConsumerState<ChooseEventLocation> {
   String address = '';
   double? lat;
   double? lon;
-  String styleUrl =
-      "https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png";
-  String apiKey =
-      "22d0ef19-8f92-4d02-96d9-f5703c4def64"; // Replace with your API key
+
+  // Using OpenStreetMap tiles - no API key required
+  final String mapUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+  // IMPORTANT: We'll recreate the map when location changes instead of using controller
+  // This ensures the map fully refreshes with new coordinates
 
   Future<List<Map<String, dynamic>>> fetchSuggestions(String input) async {
     if (input.length < 3) return [];
@@ -38,21 +40,33 @@ class _ChooseEventLocationState extends ConsumerState<ChooseEventLocation> {
       'https://nominatim.openstreetmap.org/search?format=json&q=$input&addressdetails=1',
     );
 
-    final response = await http.get(url);
+    try {
+      // Add required User-Agent header
+      final response = await http.get(
+        url,
+        headers: {
+          'User-Agent': 'FlutterMapApp/1.0',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final List data = json.decode(response.body);
-      return data
-          .map(
-            (e) => {
-              'display_name': e['display_name'] as String,
-              'lat': e['lat'] as String,
-              'lon': e['lon'] as String,
-            },
-          )
-          .toList();
-    } else {
-      throw Exception('Failed to load suggestions');
+      if (response.statusCode == 200) {
+        final List data = json.decode(response.body);
+        return data
+            .map(
+              (e) => {
+            'display_name': e['display_name'] as String,
+            'lat': e['lat'] as String,
+            'lon': e['lon'] as String,
+          },
+        )
+            .toList();
+      } else {
+        print('API Error: ${response.statusCode} - ${response.body}');
+        throw Exception('Failed to load suggestions');
+      }
+    } catch (e) {
+      print('Error fetching suggestions: $e');
+      return [];
     }
   }
 
@@ -90,9 +104,16 @@ class _ChooseEventLocationState extends ConsumerState<ChooseEventLocation> {
               onSelected: (Map<String, dynamic> suggestion) {
                 setState(() {
                   address = suggestion['display_name'];
+
+                  // Parse coordinates
                   lat = double.tryParse(suggestion['lat']);
                   lon = double.tryParse(suggestion['lon']);
+
+                  // Debug output
+                  print('Selected location: $address');
+                  print('Coordinates: lat=$lat, lon=$lon');
                 });
+
                 FocusScope.of(context).requestFocus(FocusNode());
               },
               builder: (context, controller, focusNode) {
@@ -138,7 +159,7 @@ class _ChooseEventLocationState extends ConsumerState<ChooseEventLocation> {
             ),
             if (address.isNotEmpty)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                padding: const EdgeInsets.symmetric(vertical: 10.0),
                 child: Text(
                   address,
                   style: const TextStyle(color: AppColors.primaryWhite),
@@ -147,34 +168,40 @@ class _ChooseEventLocationState extends ConsumerState<ChooseEventLocation> {
               ),
             if (lat != null && lon != null)
               Expanded(
-                child: FlutterMap(
-                  key: ValueKey("$lat$lon"),
-                  options: MapOptions(
-                    // center: LatLng(lat!, lon!),
-                    // zoom: 18,
-                    maxZoom: 18,
-                    minZoom: 3,
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate: styleUrl,
-                      additionalOptions: {"api_key": apiKey},
-                      maxZoom: 20,
-                      maxNativeZoom: 20,
+                // CRITICAL: Add unique key that changes when lat/lon changes
+                // This forces Flutter to recreate the map widget
+                key: ValueKey('map-${lat.toString()}-${lon.toString()}'),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: FlutterMap(
+                    // Don't use mapController here - we're forcing recreation instead
+                    options: MapOptions(
+                      initialCenter: LatLng(lat!, lon!),
+                      initialZoom: 15,
+                      maxZoom: 18,
+                      minZoom: 3,
                     ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: LatLng(lat!, lon!),
-                          child: const Icon(
-                            Icons.location_pin,
-                            size: 30.0,
-                            color: AppColors.primaryPink,
+                    children: [
+                      TileLayer(
+                        urlTemplate: mapUrl,
+                        userAgentPackageName: 'com.wyld.wyld',
+                      ),
+                      MarkerLayer(
+                        markers: [
+                          Marker(
+                            point: LatLng(lat!, lon!),
+                            width: 40,
+                            height: 40,
+                            child: const Icon(
+                              Icons.location_pin,
+                              size: 40.0,
+                              color: AppColors.primaryPink,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               )
             else
