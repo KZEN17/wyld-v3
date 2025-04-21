@@ -28,7 +28,6 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
       hasPendingRequestProvider(widget.eventId),
     );
     final currentUser = ref.watch(authControllerProvider);
-
     return Scaffold(
       body: eventAsyncValue.when(
         data: (event) {

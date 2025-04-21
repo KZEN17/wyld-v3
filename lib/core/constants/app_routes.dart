@@ -15,6 +15,7 @@ import '../../features/bookings/create/steps/invite_success.dart';
 import '../../features/bookings/create/steps/number_of_guests.dart';
 import '../../features/bookings/create/steps/price_screen.dart';
 import '../../features/home/screens/home_screen.dart';
+// import '../../features/profile/screens/event_history_screen.dart';
 import '../../features/profile/screens/profile_settings.dart';
 import '../../features/profile/screens/profile_view.dart';
 
@@ -25,6 +26,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String profileView = '/profile-view';
   static const String profileSettings = '/profile-settings';
+  static const String eventHistory = '/event-history'; // New route
   static const String createEvent = '/create-event';
   static const String eventTypeSelection = '/event-type-selection';
   static const String chooseEventLocation = '/choose-event-location';
@@ -36,7 +38,6 @@ class AppRoutes {
   static const String inviteSuccess = '/invite-success';
   static const String chosenEventDetails = '/chosen-event-details';
   static const String eventImageUpload = '/event-image-upload';
-
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments;
 
@@ -53,6 +54,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ProfileView());
       case profileSettings:
         return MaterialPageRoute(builder: (_) => const ProfileSettings());
+      // case eventHistory:
+      //   return MaterialPageRoute(builder: (_) => const EventHistoryScreen());
       case createEvent:
         return MaterialPageRoute(builder: (_) => const CreateEventScreen());
       case eventTypeSelection:
@@ -125,13 +128,13 @@ class AppRoutes {
     return MaterialPageRoute(
       builder:
           (_) => Scaffold(
-            body: Center(
-              child: Text(
-                'Error: $message',
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
+        body: Center(
+          child: Text(
+            'Error: $message',
+            style: const TextStyle(color: Colors.red),
           ),
+        ),
+      ),
     );
   }
 
