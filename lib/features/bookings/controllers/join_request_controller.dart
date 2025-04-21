@@ -1,58 +1,206 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/constants/app_constants.dart';
+import '../../../core/services/realtime_service.dart';
 import '../../../shared/data/models/join_request_model.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../repositories/join_request_repository.dart';
 
-// Provider for pending requests for the current host
-final hostPendingRequestsProvider = StreamProvider<List<JoinRequest>>((
-  ref,
-) async* {
+// Provider for pending requests for the current host with real-time updates
+final hostPendingRequestsProvider = StateNotifierProvider<HostPendingRequestsController, AsyncValue<List<JoinRequest>>>((ref) {
   final authState = ref.watch(authControllerProvider);
+  final joinRequestRepository = ref.watch(joinRequestRepositoryProvider);
+  final realtimeService = ref.watch(realtimeServiceProvider);
 
   if (authState.hasValue && authState.value != null) {
     final hostId = authState.value!.id;
-    final joinRequestRepository = ref.watch(joinRequestRepositoryProvider);
-
-    // Initial load
-    List<JoinRequest> requests = await joinRequestRepository
-        .getHostPendingRequests(hostId);
-    yield requests;
-
-    // TODO: Implement real-time updates with Appwrite Realtime
-    // For now we'll simulate polling
-    while (true) {
-      await Future.delayed(const Duration(seconds: 5));
-      requests = await joinRequestRepository.getHostPendingRequests(hostId);
-      yield requests;
-    }
-  } else {
-    yield [];
+    return HostPendingRequestsController(joinRequestRepository, realtimeService, hostId);
   }
+
+  // Return a controller with empty state if not authenticated
+  return HostPendingRequestsController(joinRequestRepository, realtimeService, '');
 });
 
-// Provider for requests for a specific event
-final eventRequestsProvider = FutureProvider.family<List<JoinRequest>, String>((
-  ref,
-  eventId,
-) {
+// Provider for requests for a specific event with real-time updates
+final eventRequestsProvider = StateNotifierProvider.family<EventRequestsController, AsyncValue<List<JoinRequest>>, String>((ref, eventId) {
   final joinRequestRepository = ref.watch(joinRequestRepositoryProvider);
-  return joinRequestRepository.getEventRequests(eventId);
+  final realtimeService = ref.watch(realtimeServiceProvider);
+  return EventRequestsController(joinRequestRepository, realtimeService, eventId);
 });
 
 // Provider to check if the current user has a pending request for an event
-final hasPendingRequestProvider = FutureProvider.family<bool, String>((
-  ref,
-  eventId,
-) async {
+final hasPendingRequestProvider = StateNotifierProvider.family<UserPendingRequestController, AsyncValue<bool>, String>((ref, eventId) {
   final authState = ref.watch(authControllerProvider);
+  final joinRequestRepository = ref.watch(joinRequestRepositoryProvider);
+  final realtimeService = ref.watch(realtimeServiceProvider);
+
   if (authState.hasValue && authState.value != null) {
     final userId = authState.value!.id;
-    final joinRequestRepository = ref.watch(joinRequestRepositoryProvider);
-    return joinRequestRepository.userHasPendingRequest(userId, eventId);
+    return UserPendingRequestController(joinRequestRepository, realtimeService, userId, eventId);
   }
-  return false;
+
+  // Return a controller with false state if not authenticated
+  return UserPendingRequestController(joinRequestRepository, realtimeService, '', eventId);
 });
+
+// Controller for hosting pending requests
+class HostPendingRequestsController extends StateNotifier<AsyncValue<List<JoinRequest>>> {
+  final JoinRequestRepository _joinRequestRepository;
+  final RealtimeService _realtimeService;
+  final String _hostId;
+  StreamSubscription? _subscription;
+
+  HostPendingRequestsController(this._joinRequestRepository, this._realtimeService, this._hostId)
+      : super(const AsyncValue.loading()) {
+    if (_hostId.isNotEmpty) {
+      _loadHostPendingRequests();
+      _subscribeToJoinRequests();
+    } else {
+      state = const AsyncValue.data([]);
+    }
+  }
+
+  Future<void> _loadHostPendingRequests() async {
+    try {
+      final requests = await _joinRequestRepository.getHostPendingRequests(_hostId);
+      state = AsyncValue.data(requests);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
+
+  void _subscribeToJoinRequests() {
+    try {
+      _subscription = _realtimeService
+          .subscribeToCollection(AppwriteConstants.joinRequestsCollection)
+          .listen((event) {
+        // Filter events related to this host
+        if (event.payload['hostId'] == _hostId) {
+          if (kDebugMode) {
+            print('Join request update for host: $_hostId');
+          }
+          _loadHostPendingRequests();
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error subscribing to join requests: $e');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
+
+// Controller for event requests
+class EventRequestsController extends StateNotifier<AsyncValue<List<JoinRequest>>> {
+  final JoinRequestRepository _joinRequestRepository;
+  final RealtimeService _realtimeService;
+  final String _eventId;
+  StreamSubscription? _subscription;
+
+  EventRequestsController(this._joinRequestRepository, this._realtimeService, this._eventId)
+      : super(const AsyncValue.loading()) {
+    _loadEventRequests();
+    _subscribeToEventRequests();
+  }
+
+  Future<void> _loadEventRequests() async {
+    try {
+      final requests = await _joinRequestRepository.getEventRequests(_eventId);
+      state = AsyncValue.data(requests);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
+
+  void _subscribeToEventRequests() {
+    try {
+      _subscription = _realtimeService
+          .subscribeToCollection(AppwriteConstants.joinRequestsCollection)
+          .listen((event) {
+        // Filter events related to this event
+        if (event.payload['eventId'] == _eventId) {
+          if (kDebugMode) {
+            print('Join request update for event: $_eventId');
+          }
+          _loadEventRequests();
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error subscribing to event requests: $e');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
+
+// Controller for user pending request
+class UserPendingRequestController extends StateNotifier<AsyncValue<bool>> {
+  final JoinRequestRepository _joinRequestRepository;
+  final RealtimeService _realtimeService;
+  final String _userId;
+  final String _eventId;
+  StreamSubscription? _subscription;
+
+  UserPendingRequestController(this._joinRequestRepository, this._realtimeService, this._userId, this._eventId)
+      : super(const AsyncValue.loading()) {
+    if (_userId.isNotEmpty) {
+      _checkUserPendingRequest();
+      _subscribeToUserRequests();
+    } else {
+      state = const AsyncValue.data(false);
+    }
+  }
+
+  Future<void> _checkUserPendingRequest() async {
+    try {
+      final hasPendingRequest = await _joinRequestRepository.userHasPendingRequest(_userId, _eventId);
+      state = AsyncValue.data(hasPendingRequest);
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+    }
+  }
+
+  void _subscribeToUserRequests() {
+    try {
+      _subscription = _realtimeService
+          .subscribeToCollection(AppwriteConstants.joinRequestsCollection)
+          .listen((event) {
+        // Check if this update is related to the user and event we're monitoring
+        final payload = event.payload;
+        if (payload['userId'] == _userId && payload['eventId'] == _eventId) {
+          if (kDebugMode) {
+            print('User request update for user: $_userId and event: $_eventId');
+          }
+          _checkUserPendingRequest();
+        }
+      });
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error subscribing to user requests: $e');
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+}
 
 class JoinRequestController {
   final JoinRequestRepository _joinRequestRepository;
@@ -61,12 +209,13 @@ class JoinRequestController {
 
   // Send a join request
   Future<void> sendJoinRequest(
-    String eventId,
-    String hostId,
-    String userId,
-  ) async {
+      String eventId,
+      String hostId,
+      String userId,
+      ) async {
     try {
       await _joinRequestRepository.sendJoinRequest(eventId, hostId, userId);
+      // The real-time controllers will update automatically
     } catch (e) {
       rethrow;
     }
@@ -76,6 +225,7 @@ class JoinRequestController {
   Future<void> updateRequestStatus(String requestId, String newStatus) async {
     try {
       await _joinRequestRepository.updateRequestStatus(requestId, newStatus);
+      // The real-time controllers will update automatically
     } catch (e) {
       rethrow;
     }

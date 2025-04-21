@@ -63,7 +63,8 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
               .read(joinRequestRepositoryProvider)
               .getEventRequests(widget.eventId);
 
-          final pending = requests.where((req) => req.status == 'pending').toList();
+          final pending =
+              requests.where((req) => req.status == 'pending').toList();
 
           setState(() {
             pendingRequests = pending;
@@ -83,9 +84,7 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
   @override
   Widget build(BuildContext context) {
     final eventAsyncValue = ref.watch(eventProvider(widget.eventId));
-    final hasPendingRequestAsyncValue = ref.watch(
-      hasPendingRequestProvider(widget.eventId),
-    );
+    final hasPendingRequestAsyncValue = ref.watch(hasPendingRequestProvider(widget.eventId));
     final currentUser = ref.watch(authControllerProvider);
     final commentsAsync = ref.watch(eventCommentsProvider(widget.eventId));
 
@@ -114,12 +113,12 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
   }
 
   Widget _buildEventDetailsView(
-      BuildContext context,
-      EventModel event,
-      bool hasPendingRequest,
-      String currentUserId,
-      AsyncValue<List<Comment>> commentsAsync,
-      ) {
+    BuildContext context,
+    EventModel event,
+    bool hasPendingRequest,
+    String currentUserId,
+    AsyncValue<List<Comment>> commentsAsync,
+  ) {
     final isHost = event.hostId == currentUserId;
     final isAttending = event.guestsId.contains(currentUserId);
     final showJoinButton =
@@ -151,7 +150,7 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
             const Divider(color: AppColors.secondaryBackground, thickness: 1),
             _buildEventDescription(event),
             const Divider(color: AppColors.secondaryBackground, thickness: 1),
-            if (!isHost) _buildHostInfo(event),
+            if (!isHost) _buildHostInfo(ref, event),
             _buildGuestList(event, isHost),
             if (isHost && pendingRequests.isNotEmpty)
               _buildPendingRequestsSection(),
@@ -178,31 +177,31 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
           height: 200,
           width: double.infinity,
           child:
-          event.venueImages.isNotEmpty
-              ? Image.network(
-            event.venueImages[0],
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stack) {
-              return Container(
-                color: AppColors.secondaryBackground,
-                child: const Icon(
-                  Icons.broken_image,
-                  size: 60,
-                  color: AppColors.grayBorder,
-                ),
-              );
-            },
-          )
-              : Container(
-            color: AppColors.secondaryBackground,
-            child: const Center(
-              child: Icon(
-                Icons.image,
-                size: 60,
-                color: AppColors.grayBorder,
-              ),
-            ),
-          ),
+              event.venueImages.isNotEmpty
+                  ? Image.network(
+                    event.venueImages[0],
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) {
+                      return Container(
+                        color: AppColors.secondaryBackground,
+                        child: const Icon(
+                          Icons.broken_image,
+                          size: 60,
+                          color: AppColors.grayBorder,
+                        ),
+                      );
+                    },
+                  )
+                  : Container(
+                    color: AppColors.secondaryBackground,
+                    child: const Center(
+                      child: Icon(
+                        Icons.image,
+                        size: 60,
+                        color: AppColors.grayBorder,
+                      ),
+                    ),
+                  ),
         ),
         Positioned(
           top: 20,
@@ -229,10 +228,7 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
               gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
-                colors: [
-                  Colors.black.withOpacity(0.7),
-                  Colors.transparent,
-                ],
+                colors: [Colors.black.withOpacity(0.7), Colors.transparent],
               ),
             ),
             child: Row(
@@ -262,15 +258,16 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                   Row(
                     children: List.generate(
                       event.venueImages.length,
-                          (index) => Container(
+                      (index) => Container(
                         width: 8,
                         height: 8,
                         margin: const EdgeInsets.only(left: 4),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: index == 0
-                              ? AppColors.primaryWhite
-                              : AppColors.primaryWhite.withOpacity(0.4),
+                          color:
+                              index == 0
+                                  ? AppColors.primaryWhite
+                                  : AppColors.primaryWhite.withOpacity(0.4),
                         ),
                       ),
                     ),
@@ -284,7 +281,8 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
   }
 
   int _getAvailableSeats(EventModel event) {
-    final totalSeats = (event.numberOfGuests['men'] ?? 0) +
+    final totalSeats =
+        (event.numberOfGuests['men'] ?? 0) +
         (event.numberOfGuests['women'] ?? 0);
     return totalSeats - event.guestsId.length;
   }
@@ -401,82 +399,106 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
     );
   }
 
-  Widget _buildHostInfo(EventModel event) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Meet your host',
-            style: TextStyle(
-              color: AppColors.primaryWhite,
-              fontSize: 18.0,
-              fontWeight: FontWeight.w600,
+  Widget _buildHostInfo(WidgetRef ref, EventModel event) {
+    final hostAsync = ref.watch(userByIdProvider(event.hostId));
+
+    return hostAsync.when(
+      data:
+          (host) => Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 24.0,
+              vertical: 15.0,
             ),
-          ),
-          const SizedBox(height: 15),
-          // We should fetch host data from User collection in a real implementation
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: BoxDecoration(
-              color: AppColors.secondaryBackground,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const CircleAvatar(
-                  radius: 25,
-                  backgroundColor: AppColors.grayBorder,
-                  child: Icon(Icons.person, color: AppColors.primaryWhite),
+                const Text(
+                  'Meet your host',
+                  style: TextStyle(
+                    color: AppColors.primaryWhite,
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Host",
-                      style: const TextStyle(
-                        color: AppColors.primaryWhite,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w600,
+                const SizedBox(height: 15),
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondaryBackground,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundColor: AppColors.grayBorder,
+                        backgroundImage: NetworkImage(host.profileImages[0]),
                       ),
-                    ),
-                    Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.amber, size: 14),
-                        SizedBox(width: 5),
-                        Text(
-                          '4.8 (7 reviews)',
-                          style: TextStyle(
-                            color: AppColors.secondaryWhite,
-                            fontSize: 14.0,
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            host.name,
+                            style: const TextStyle(
+                              color: AppColors.primaryWhite,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 14,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                '4.8 (7 reviews)', // You could later fetch dynamic ratings here too
+                                style: const TextStyle(
+                                  color: AppColors.secondaryWhite,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const Spacer(),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Implement message host functionality
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryPink,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () {
-                    // Implement message host functionality
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryPink,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+                        child: const Text('Message'),
+                      ),
+                    ],
                   ),
-                  child: const Text('Message'),
+                ),
+                const Divider(
+                  color: AppColors.secondaryBackground,
+                  thickness: 1,
                 ),
               ],
             ),
           ),
-          const Divider(color: AppColors.secondaryBackground, thickness: 1),
-        ],
-      ),
+      loading:
+          () => const Padding(
+            padding: EdgeInsets.all(24),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+      error:
+          (err, _) => const Padding(
+            padding: EdgeInsets.all(24),
+            child: Text('Failed to load host info'),
+          ),
     );
   }
 
@@ -523,7 +545,8 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
               height: 60,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: event.guestsId.length > 5 ? 5 : event.guestsId.length,
+                itemCount:
+                    event.guestsId.length > 5 ? 5 : event.guestsId.length,
                 itemBuilder: (context, index) {
                   // In a real implementation, we would fetch user data from User collection
                   return Padding(
@@ -574,7 +597,9 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
               child: Padding(
                 padding: EdgeInsets.all(16.0),
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPink),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.primaryPink,
+                  ),
                 ),
               ),
             )
@@ -590,7 +615,7 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
               itemCount: pendingRequests.length,
               itemBuilder: (context, index) {
                 final request = pendingRequests[index];
-                return _buildRequestCard(request);
+                return _buildRequestCard(ref, request);
               },
             ),
         ],
@@ -598,64 +623,70 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
     );
   }
 
-  Widget _buildRequestCard(JoinRequest request) {
-    // In a real implementation, we would fetch user data from User collection
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.secondaryBackground,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.grayBorder,
-            child: Icon(Icons.person, color: AppColors.primaryWhite),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildRequestCard(WidgetRef ref, JoinRequest request) {
+    final userAsync = ref.watch(userByIdProvider(request.userId));
+
+    return userAsync.when(
+      data:
+          (user) => Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.secondaryBackground,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
               children: [
-                Text(
-                  'User ID: ${request.userId.substring(0, 8)}...',
-                  style: const TextStyle(
-                    color: AppColors.primaryWhite,
-                    fontWeight: FontWeight.bold,
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.grayBorder,
+                  backgroundImage: NetworkImage(user.profileImages[0]),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.name,
+                        style: const TextStyle(
+                          color: AppColors.primaryWhite,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'Requested to join',
+                        style: TextStyle(
+                          color: AppColors.secondaryWhite,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  'Requested to join',
-                  style: TextStyle(
-                    color: AppColors.secondaryWhite,
-                    fontSize: 12,
-                  ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(
+                        Icons.check_circle_outline,
+                        color: Colors.green,
+                      ),
+                      onPressed: () => _respondToRequest(request, 'accepted'),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.red,
+                      ),
+                      onPressed: () => _respondToRequest(request, 'rejected'),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(
-                  Icons.check_circle_outline,
-                  color: Colors.green,
-                ),
-                onPressed: () => _respondToRequest(request, 'accepted'),
-              ),
-              IconButton(
-                icon: const Icon(
-                  Icons.cancel_outlined,
-                  color: Colors.red,
-                ),
-                onPressed: () => _respondToRequest(request, 'rejected'),
-              ),
-            ],
-          ),
-        ],
-      ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (err, stack) => Text('Error loading user'),
     );
   }
 
@@ -689,18 +720,23 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Request ${status == 'accepted' ? 'accepted' : 'rejected'}'),
+          content: Text(
+            'Request ${status == 'accepted' ? 'accepted' : 'rejected'}',
+          ),
           backgroundColor: status == 'accepted' ? Colors.green : Colors.red,
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
     }
   }
 
-  Widget _buildCommentsSection(AsyncValue<List<Comment>> commentsAsync, String currentUserId) {
+  Widget _buildCommentsSection(
+    AsyncValue<List<Comment>> commentsAsync,
+    String currentUserId,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 15.0),
       child: Column(
@@ -729,7 +765,10 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                 hintStyle: const TextStyle(color: AppColors.secondaryWhite),
                 filled: true,
                 fillColor: Colors.transparent,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 border: InputBorder.none,
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.send, color: AppColors.primaryPink),
@@ -764,23 +803,27 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                 },
               );
             },
-            loading: () => const Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 16.0),
-                child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPink),
+            loading:
+                () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16.0),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryPink,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            error: (error, _) => Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  'Error loading comments: $error',
-                  style: const TextStyle(color: Colors.red),
+            error:
+                (error, _) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Text(
+                      'Error loading comments: $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
                 ),
-              ),
-            ),
           ),
         ],
       ),
@@ -799,14 +842,14 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
           // User avatar
           comment.userImage.isNotEmpty
               ? CircleAvatar(
-            radius: 16,
-            backgroundImage: NetworkImage(comment.userImage),
-          )
+                radius: 16,
+                backgroundImage: NetworkImage(comment.userImage),
+              )
               : const CircleAvatar(
-            radius: 16,
-            backgroundColor: AppColors.primaryPink,
-            child: Icon(Icons.person, color: Colors.white, size: 16),
-          ),
+                radius: 16,
+                backgroundColor: AppColors.primaryPink,
+                child: Icon(Icons.person, color: Colors.white, size: 16),
+              ),
           const SizedBox(width: 12),
           // Comment content
           Expanded(
@@ -818,7 +861,10 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                     Text(
                       comment.userName,
                       style: TextStyle(
-                        color: isCurrentUser ? AppColors.primaryPink : AppColors.primaryWhite,
+                        color:
+                            isCurrentUser
+                                ? AppColors.primaryPink
+                                : AppColors.primaryWhite,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
@@ -836,9 +882,7 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                 const SizedBox(height: 4),
                 Text(
                   comment.text,
-                  style: const TextStyle(
-                    color: AppColors.primaryWhite,
-                  ),
+                  style: const TextStyle(color: AppColors.primaryWhite),
                 ),
               ],
             ),
@@ -846,7 +890,11 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
           // Delete button for current user's comments
           if (isCurrentUser)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: Colors.red, size: 16),
+              icon: const Icon(
+                Icons.delete_outline,
+                color: Colors.red,
+                size: 16,
+              ),
               onPressed: () => _deleteComment(comment.id),
             ),
         ],
@@ -889,33 +937,41 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
         eventId: widget.eventId,
         userId: user.id,
         userName: user.name,
-        userImage: user.profileImages.isNotEmpty
-            ? user.profileImages[0]
-            : (user.userImages.isNotEmpty ? user.userImages[0] : ''),
+        userImage:
+            user.profileImages.isNotEmpty
+                ? user.profileImages[0]
+                : (user.userImages.isNotEmpty ? user.userImages[0] : ''),
         text: text,
       );
 
-      await ref.read(eventCommentsProvider(widget.eventId).notifier).addComment(comment);
+      await ref
+          .read(eventCommentsProvider(widget.eventId).notifier)
+          .addComment(comment);
+      await ref
+          .read(eventCommentsProvider(widget.eventId).notifier)
+          .getComments();
 
       // Clear the input field
       _commentController.clear();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error posting comment: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error posting comment: $e')));
     }
   }
 
   void _deleteComment(String commentId) async {
     try {
-      await ref.read(eventCommentsProvider(widget.eventId).notifier).deleteComment(commentId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment deleted')),
-      );
+      await ref
+          .read(eventCommentsProvider(widget.eventId).notifier)
+          .deleteComment(commentId);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Comment deleted')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting comment: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error deleting comment: $e')));
     }
   }
 
@@ -944,22 +1000,42 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                 ),
                 Row(
                   children: [
-                    Text(
-                      '\${event.priceMen.toStringAsFixed(0)} Men',
-                      style: const TextStyle(
-                        color: AppColors.primaryWhite,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: 20.0,
+                          width: 20.0,
+                          child: Image.asset('assets/icons/male.png'),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '\$${event.priceMen.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: AppColors.primaryWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      '\${event.priceWomen.toStringAsFixed(0)} Women',
-                      style: const TextStyle(
-                        color: AppColors.primaryWhite,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: 20.0,
+                          width: 20.0,
+                          child: Image.asset('assets/icons/female.png'),
+                        ),
+                        const SizedBox(width: 5),
+                        Text(
+                          '\$${event.priceWomen.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            color: AppColors.primaryWhite,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -1010,9 +1086,9 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
         ),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending request: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error sending request: $e')));
     }
   }
 }

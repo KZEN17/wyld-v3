@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wyld/features/explore/screens/chosen_event_details.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../bookings/controllers/event_controller.dart';
-import '../../bookings/screens/chosen_event_details.dart';
 import '../widgets/event_card.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {

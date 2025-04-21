@@ -108,6 +108,20 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
       state = AsyncValue.error(e, stackTrace);
     }
   }
+  Future<UserModel?> getUserById({
+    required String userId,
+    required BuildContext context,
+  }) async {
+    try {
+      final user = await _authRepository.getUserById(userId);
+      return user;
+    } catch (e, stackTrace) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch user: $e')),
+      );
+      return null;
+    }
+  }
 
   Future<UserModel> uploadProfileImages({
     required UserModel userModel,
@@ -166,6 +180,10 @@ class AuthController extends StateNotifier<AsyncValue<UserModel?>> {
     }
   }
 }
+final userByIdProvider = FutureProvider.family<UserModel, String>((ref, userId) async {
+  final authRepo = ref.read(authRepositoryProvider);
+  return await authRepo.getUserById(userId);
+});
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, AsyncValue<UserModel?>>((ref) {

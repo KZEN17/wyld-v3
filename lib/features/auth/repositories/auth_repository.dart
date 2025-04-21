@@ -41,6 +41,9 @@ class AuthRepository {
   Future<void> logout() async {
     await _appwriteService.logout();
   }
+  Future<UserModel> getUserById(String userId) async {
+    return await _appwriteService.getUserById(userId);
+  }
 
   Future<UserModel?> getCurrentUser() async {
     return await _appwriteService.getCurrentUser();

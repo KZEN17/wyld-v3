@@ -136,7 +136,15 @@ class AppwriteService {
       return null;
     }
   }
+  Future<UserModel> getUserById(String userId) async {
+    final document = await _databases.getDocument(
+      databaseId: AppwriteConstants.databaseId,
+      collectionId: AppwriteConstants.usersCollection,
+      documentId: userId,
+    );
 
+    return UserModel.fromJson(document.data);
+  }
   Future<UserModel> updateUserProfile(UserModel userModel) async {
     try {
       final response = await _databases.updateDocument(

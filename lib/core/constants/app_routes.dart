@@ -112,12 +112,12 @@ class AppRoutes {
         return _errorRoute('Event ID is required');
       case inviteSuccess:
         return MaterialPageRoute(builder: (_) => const InviteSuccess());
-      case chosenEventDetails:
-        if (args is String) {
-          return MaterialPageRoute(
-            builder: (_) => ChosenEventDetails(eventId: args),
-          );
-        }
+      // case chosenEventDetails:
+      //   if (args is String) {
+      //     return MaterialPageRoute(
+      //       builder: (_) => ChosenEventDetails(eventId: args),
+      //     );
+      //   }
         return _errorRoute('Event ID is required');
       default:
         return _errorRoute('Route not found: ${settings.name}');
