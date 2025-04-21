@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:wyld/shared/widgets/profile_avatar_widget.dart';
 
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/data/models/comment_model.dart';
@@ -84,7 +85,9 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
   @override
   Widget build(BuildContext context) {
     final eventAsyncValue = ref.watch(eventProvider(widget.eventId));
-    final hasPendingRequestAsyncValue = ref.watch(hasPendingRequestProvider(widget.eventId));
+    final hasPendingRequestAsyncValue = ref.watch(
+      hasPendingRequestProvider(widget.eventId),
+    );
     final currentUser = ref.watch(authControllerProvider);
     final commentsAsync = ref.watch(eventCommentsProvider(widget.eventId));
 
@@ -421,65 +424,66 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                Container(
-                  padding: const EdgeInsets.all(15),
-                  decoration: BoxDecoration(
-                    color: AppColors.secondaryBackground,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundColor: AppColors.grayBorder,
-                        backgroundImage: NetworkImage(host.profileImages[0]),
-                      ),
-                      const SizedBox(width: 15),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            host.name,
-                            style: const TextStyle(
-                              color: AppColors.primaryWhite,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w600,
+                GestureDetector(
+                  onTap: (){
+                    Navigator.of(context).pushNamed('/user-profile-view', arguments: host.id);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondaryBackground,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        ProfileAvatar(userId: host.id),
+                        const SizedBox(width: 15),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              host.name,
+                              style: const TextStyle(
+                                color: AppColors.primaryWhite,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: Colors.amber,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  '4.8 (7 reviews)', // You could later fetch dynamic ratings here too
+                                  style: const TextStyle(
+                                    color: AppColors.secondaryWhite,
+                                    fontSize: 14.0,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        ElevatedButton(
+                          onPressed: () {
+                            // Implement message host functionality
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryPink,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Colors.amber,
-                                size: 14,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                '4.8 (7 reviews)', // You could later fetch dynamic ratings here too
-                                style: const TextStyle(
-                                  color: AppColors.secondaryWhite,
-                                  fontSize: 14.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      ElevatedButton(
-                        onPressed: () {
-                          // Implement message host functionality
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryPink,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
+                          child: const Text('Message'),
                         ),
-                        child: const Text('Message'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 const Divider(
@@ -519,19 +523,6 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              if (event.guestsId.isNotEmpty)
-                TextButton(
-                  onPressed: () {
-                    // View all guests
-                  },
-                  child: const Text(
-                    'View all',
-                    style: TextStyle(
-                      color: AppColors.primaryPink,
-                      fontSize: 14.0,
-                    ),
-                  ),
-                ),
             ],
           ),
           const SizedBox(height: 10),
@@ -545,93 +536,17 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
               height: 80, // Increased height to accommodate guest names
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: event.guestsId.length > 5 ? 5 : event.guestsId.length,
+                itemCount:
+                    event.guestsId.length > 5 ? 5 : event.guestsId.length,
                 itemBuilder: (context, index) {
                   final userId = event.guestsId[index];
                   return Padding(
                     padding: const EdgeInsets.only(right: 12.0),
-                    child: _buildGuestAvatar(userId),
+                    child: ProfileAvatar(userId: userId),
                   );
                 },
               ),
             ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGuestAvatar(String userId) {
-    // Use the userByIdProvider to fetch user data
-    final userAsync = ref.watch(userByIdProvider(userId));
-
-    return userAsync.when(
-      data: (user) => Column(
-        children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.grayBorder,
-            backgroundImage: user.profileImages.isNotEmpty
-                ? NetworkImage(user.profileImages[0])
-                : null,
-            child: user.profileImages.isEmpty
-                ? const Icon(Icons.person, color: Colors.white)
-                : null,
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            width: 60,
-            child: Text(
-              user.name,
-              style: const TextStyle(
-                color: AppColors.secondaryWhite,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-      loading: () => const Column(
-        children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.secondaryBackground,
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPink),
-              ),
-            ),
-          ),
-          SizedBox(height: 4),
-          SizedBox(
-            width: 60,
-            height: 12,
-          ),
-        ],
-      ),
-      error: (error, stack) => const Column(
-        children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: AppColors.secondaryBackground,
-            child: Icon(Icons.error_outline, color: Colors.red),
-          ),
-          SizedBox(height: 4),
-          SizedBox(
-            width: 60,
-            child: Text(
-              'Error',
-              style: TextStyle(
-                color: Colors.red,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
         ],
       ),
     );

@@ -8,9 +8,9 @@ class PendingRequestsWidget extends ConsumerWidget {
   final VoidCallback onTap;
 
   const PendingRequestsWidget({
-    Key? key,
+    super.key,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +29,8 @@ class PendingRequestsWidget extends ConsumerWidget {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              gradient: AppColors.mainGradient,
+              color: AppColors.secondaryBackground,
+              // gradient: AppColors.mainGradient,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -73,7 +74,7 @@ class PendingRequestsWidget extends ConsumerWidget {
                         Text(
                           'You have ${requests.length} pending ${requests.length == 1 ? 'request' : 'requests'}',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppColors.primaryPink,
                             fontSize: 12,
                           ),
                         ),

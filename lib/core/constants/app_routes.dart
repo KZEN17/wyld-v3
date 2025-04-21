@@ -166,7 +166,9 @@ import '../../features/chat/screens/chat_screen.dart';
 import '../../features/home/screens/home_screen.dart';
 import '../../features/profile/screens/profile_settings.dart';
 import '../../features/profile/screens/profile_view.dart';
-
+import '../../features/profile/screens/user_profile_view.dart';
+import '../../features/profile/screens/profile_edit_screen.dart';
+import '../../features/profile/screens/friend_requests_screen.dart';
 class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
@@ -188,7 +190,9 @@ class AppRoutes {
   static const String eventImageUpload = '/event-image-upload';
   static const String chat = '/chat';
   static const String requests = '/requests';
-
+  static const String userProfileView = '/user-profile-view';
+  static const String profileEdit = '/profile-edit';
+  static const String friendRequests = '/friend-requests';
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments;
 
@@ -205,6 +209,20 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const ProfileView());
       case profileSettings:
         return MaterialPageRoute(builder: (_) => const ProfileSettings());
+      case userProfileView:
+        if (args is String) {
+          return MaterialPageRoute(
+            builder: (_) => UserProfileView(userId: args),
+          );
+        }
+        return _errorRoute('User ID is required');
+
+      case profileEdit:
+        return MaterialPageRoute(builder: (_) => const ProfileEditScreen());
+
+      case friendRequests:
+        return MaterialPageRoute(builder: (_) => const FriendRequestsScreen());
+
       case createEvent:
         return MaterialPageRoute(builder: (_) => const CreateEventScreen());
       case requests:

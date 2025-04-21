@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:wyld/shared/widgets/profile_avatar_widget.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../shared/data/models/event_model.dart';
 import '../../auth/controllers/auth_controller.dart';
@@ -17,7 +18,7 @@ class EventCard extends ConsumerWidget {
     final bool isUpcoming = event.eventDateTime.isAfter(now);
     final totalGuests =
         (event.numberOfGuests['men'] ?? 0) +
-            (event.numberOfGuests['women'] ?? 0);
+        (event.numberOfGuests['women'] ?? 0);
     final availableSpace = totalGuests - event.guestsId.length;
     final hostAsync = ref.watch(userByIdProvider(event.hostId));
 
@@ -45,27 +46,27 @@ class EventCard extends ConsumerWidget {
                     // Event image or placeholder
                     event.venueImages.isNotEmpty
                         ? Image.network(
-                      event.venueImages[0],
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
+                          event.venueImages[0],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: AppColors.grayBorder,
+                              child: const Icon(
+                                Icons.broken_image,
+                                color: AppColors.secondaryWhite,
+                                size: 40,
+                              ),
+                            );
+                          },
+                        )
+                        : Container(
                           color: AppColors.grayBorder,
                           child: const Icon(
-                            Icons.broken_image,
+                            Icons.image,
                             color: AppColors.secondaryWhite,
                             size: 40,
                           ),
-                        );
-                      },
-                    )
-                        : Container(
-                      color: AppColors.grayBorder,
-                      child: const Icon(
-                        Icons.image,
-                        color: AppColors.secondaryWhite,
-                        size: 40,
-                      ),
-                    ),
+                        ),
 
                     // Guest count badge
                     Positioned(
@@ -195,7 +196,8 @@ class EventCard extends ConsumerWidget {
                       height: 40,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center, // Changed to center
+                        crossAxisAlignment:
+                            CrossAxisAlignment.center, // Changed to center
                         children: [
                           // For consistency with your example
                           if (isUpcoming && availableSpace > 0)
@@ -218,12 +220,22 @@ class EventCard extends ConsumerWidget {
                               if (event.guestsId.isNotEmpty)
                                 SizedBox(
                                   height: 32,
-                                  width: event.guestsId.length < 3 ? event.guestsId.length * 35 : 100,
+                                  width:
+                                      event.guestsId.length < 3
+                                          ? event.guestsId.length * 35
+                                          : 100,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
-                                    itemCount: event.guestsId.length > 3 ? 3 : event.guestsId.length,
+                                    itemCount:
+                                        event.guestsId.length > 3
+                                            ? 3
+                                            : event.guestsId.length,
                                     itemBuilder: (context, index) {
-                                      return _buildGuestItem(context, ref, event.guestsId[index]);
+                                      return _buildGuestItem(
+                                        context,
+                                        ref,
+                                        event.guestsId[index],
+                                      );
                                     },
                                   ),
                                 ),
@@ -233,10 +245,11 @@ class EventCard extends ConsumerWidget {
                                 Container(
                                   height: 32.0,
                                   width: 1.0,
-                                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                                  margin: const EdgeInsets.symmetric(
+                                    horizontal: 8.0,
+                                  ),
                                   color: AppColors.primaryWhite,
                                 ),
-
 
                               const SizedBox(height: 2.0),
                               hostAsync.when(
@@ -244,27 +257,16 @@ class EventCard extends ConsumerWidget {
                                   if (host.profileImages.isEmpty) {
                                     return _buildDefaultAvatar();
                                   }
-
-                                  return Container(
-                                    height: 34.0, // Slightly smaller
-                                    width: 34.0,  // Slightly smaller
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(width: 1.5, color: AppColors.primaryPink),
-                                      image: DecorationImage(
-                                        fit: BoxFit.cover,
-                                        image: NetworkImage(host.profileImages[0]),
+                                  return ProfileAvatar(userId: host.id);
+                                },
+                                loading:
+                                    () => const SizedBox(
+                                      height: 30.0,
+                                      width: 30.0,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
                                       ),
                                     ),
-                                  );
-                                },
-                                loading: () => const SizedBox(
-                                  height: 30.0,
-                                  width: 30.0,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                ),
                                 error: (_, __) => _buildDefaultAvatar(),
                               ),
                             ],
@@ -292,26 +294,14 @@ class EventCard extends ConsumerWidget {
           if (user.profileImages.isEmpty) {
             return _buildDefaultAvatar();
           }
-
-          return Container(
-            height: 34.0, // Slightly smaller
-            width: 34.0,  // Slightly smaller
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              image: DecorationImage(
-                fit: BoxFit.cover,
-                image: NetworkImage(user.profileImages[0]),
-              ),
-            ),
-          );
+          return ProfileAvatar(userId: userId);
         },
-        loading: () => const SizedBox(
-          height: 34.0,
-          width: 34.0,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-          ),
-        ),
+        loading:
+            () => const SizedBox(
+              height: 34.0,
+              width: 34.0,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
         error: (_, __) => _buildDefaultAvatar(),
       ),
     );
@@ -320,7 +310,7 @@ class EventCard extends ConsumerWidget {
   Widget _buildDefaultAvatar() {
     return Container(
       height: 34.0, // Slightly smaller
-      width: 34.0,  // Slightly smaller
+      width: 34.0, // Slightly smaller
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.grayBorder,

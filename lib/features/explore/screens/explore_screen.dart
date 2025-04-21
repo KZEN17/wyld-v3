@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:wyld/features/bookings/screens/widgets/pending_requests_widget.dart';
 import 'package:wyld/features/explore/screens/chosen_event_details.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../bookings/controllers/event_controller.dart';
+import '../../bookings/screens/requests_screen.dart';
 import '../widgets/event_card.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
@@ -57,6 +59,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
               scrollDirection: Axis.vertical,
               physics: const BouncingScrollPhysics(),
               children: [
+                PendingRequestsWidget(onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const RequestsScreen()),
+                  );
+                }),
+
                  Padding(
                   padding: EdgeInsets.only(left: 8.0, bottom: 16.0),
                   child: Row(
