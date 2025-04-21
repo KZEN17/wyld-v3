@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wyld/features/explore/screens/chosen_event_details.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../bookings/controllers/event_controller.dart';
@@ -51,22 +52,32 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             sortedEvents.sort((a, b) => a.eventDateTime.compareTo(b.eventDateTime));
 
             return ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              physics: const BouncingScrollPhysics(),
               children: [
-                const Padding(
+                 Padding(
                   padding: EdgeInsets.only(left: 8.0, bottom: 16.0),
-                  child: Text(
-                    'Upcoming Tables',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primaryWhite,
-                    ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Browse Tables',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryWhite,
+                        ),
+                      ),
+                      IconButton(onPressed: (){}, icon: SvgPicture.asset('assets/svg/filter_icon.svg'))
+                    ],
                   ),
                 ),
                 ListView.builder(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: sortedEvents.length,
                   itemBuilder: (context, index) {
                     final event = sortedEvents[index];
