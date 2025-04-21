@@ -542,36 +542,96 @@ class _ChosenEventDetailsState extends ConsumerState<ChosenEventDetails> {
             )
           else
             SizedBox(
-              height: 60,
+              height: 80, // Increased height to accommodate guest names
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount:
-                    event.guestsId.length > 5 ? 5 : event.guestsId.length,
+                itemCount: event.guestsId.length > 5 ? 5 : event.guestsId.length,
                 itemBuilder: (context, index) {
-                  // In a real implementation, we would fetch user data from User collection
+                  final userId = event.guestsId[index];
                   return Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Column(
-                      children: [
-                        const CircleAvatar(
-                          radius: 20,
-                          backgroundColor: AppColors.primaryPink,
-                          child: Icon(Icons.person, color: Colors.white),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Guest ${index + 1}',
-                          style: const TextStyle(
-                            color: AppColors.secondaryWhite,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
+                    padding: const EdgeInsets.only(right: 12.0),
+                    child: _buildGuestAvatar(userId),
                   );
                 },
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGuestAvatar(String userId) {
+    // Use the userByIdProvider to fetch user data
+    final userAsync = ref.watch(userByIdProvider(userId));
+
+    return userAsync.when(
+      data: (user) => Column(
+        children: [
+          CircleAvatar(
+            radius: 25,
+            backgroundColor: AppColors.grayBorder,
+            backgroundImage: user.profileImages.isNotEmpty
+                ? NetworkImage(user.profileImages[0])
+                : null,
+            child: user.profileImages.isEmpty
+                ? const Icon(Icons.person, color: Colors.white)
+                : null,
+          ),
+          const SizedBox(height: 4),
+          SizedBox(
+            width: 60,
+            child: Text(
+              user.name,
+              style: const TextStyle(
+                color: AppColors.secondaryWhite,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+      loading: () => const Column(
+        children: [
+          CircleAvatar(
+            radius: 25,
+            backgroundColor: AppColors.secondaryBackground,
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPink),
+              ),
+            ),
+          ),
+          SizedBox(height: 4),
+          SizedBox(
+            width: 60,
+            height: 12,
+          ),
+        ],
+      ),
+      error: (error, stack) => const Column(
+        children: [
+          CircleAvatar(
+            radius: 25,
+            backgroundColor: AppColors.secondaryBackground,
+            child: Icon(Icons.error_outline, color: Colors.red),
+          ),
+          SizedBox(height: 4),
+          SizedBox(
+            width: 60,
+            child: Text(
+              'Error',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );
