@@ -21,10 +21,10 @@ class JoinRequestRepository {
 
   // Create a new join request
   Future<void> sendJoinRequest(
-    String eventId,
-    String hostId,
-    String userId,
-  ) async {
+      String eventId,
+      String hostId,
+      String userId,
+      ) async {
     try {
       final joinRequest = JoinRequest.create(
         eventId: eventId,
@@ -84,6 +84,25 @@ class JoinRequestRepository {
         queries: [
           Query.equal('hostId', hostId),
           Query.equal('status', 'pending'),
+        ],
+      );
+
+      return documents.documents
+          .map((document) => JoinRequest.fromJson(document.data))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Get all requests for a host (regardless of status)
+  Future<List<JoinRequest>> getHostAllRequests(String hostId) async {
+    try {
+      final documents = await _db.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.joinRequestsCollection,
+        queries: [
+          Query.equal('hostId', hostId),
         ],
       );
 
