@@ -192,7 +192,7 @@ class EventCard extends ConsumerWidget {
                     ),
 
                     SizedBox(
-                      height: 40, // Fixed height to prevent overflow
+                      height: 40,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center, // Changed to center
@@ -250,6 +250,7 @@ class EventCard extends ConsumerWidget {
                                     width: 34.0,  // Slightly smaller
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
+                                      border: Border.all(width: 1.5, color: AppColors.primaryPink),
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
                                         image: NetworkImage(host.profileImages[0]),
