@@ -17,9 +17,7 @@ final friendRepositoryProvider = Provider((ref) {
   );
 });
 
-// Collection ID for friend requests
-// This needs to be added to AppwriteConstants
-const String friendRequestsCollection = 'friendRequests';
+
 
 class FriendRepository {
   final Databases _db;
@@ -31,7 +29,7 @@ class FriendRepository {
     try {
       await _db.createDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: friendRequestsCollection,
+        collectionId: AppwriteConstants.friendRequestsCollection,
         documentId: request.id,
         data: request.toJson(),
       );
@@ -45,7 +43,7 @@ class FriendRepository {
     try {
       final response = await _db.listDocuments(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: friendRequestsCollection,
+        collectionId: AppwriteConstants.friendRequestsCollection,
       );
 
       return response.documents
@@ -61,7 +59,7 @@ class FriendRepository {
     try {
       await _db.deleteDocument(
         databaseId: AppwriteConstants.databaseId,
-        collectionId: friendRequestsCollection,
+        collectionId: AppwriteConstants.friendRequestsCollection,
         documentId: requestId,
       );
     } catch (e) {
