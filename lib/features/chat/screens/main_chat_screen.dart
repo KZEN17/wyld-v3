@@ -416,130 +416,231 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
     final hostAsync = ref.watch(userByIdProvider(event.hostId));
 
     return InkWell(
-        onTap: () {
-          // Navigate to event chat screen
-          Navigator.pushNamed(context, '/chat', arguments: event.eventId);
-        },
-        child: Container(
+      onTap: () {
+        // Navigate to event chat screen
+        Navigator.pushNamed(context, '/chat', arguments: event.eventId);
+      },
+      child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-    color: AppColors.secondaryBackground,
-    borderRadius: BorderRadius.circular(12),
-    ),
-    child: Row(
-    children: [
-    // Event image
-    Container(
-    width: 60,
-    height: 60,
-    decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(12),
-    image: event.venueImages.isNotEmpty
-    ? DecorationImage(
-    image: NetworkImage(event.venueImages[0]),
-    fit: BoxFit.cover,
-    )
-        : null,
-    color: event.venueImages.isEmpty ? AppColors.grayBorder : null,
-    ),
-    child: event.venueImages.isEmpty
-    ? const Icon(Icons.event, color: AppColors.primaryWhite)
-        : null,
-    ),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.secondaryBackground,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            // Event image
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: event.venueImages.isNotEmpty
+                    ? DecorationImage(
+                  image: NetworkImage(event.venueImages[0]),
+                  fit: BoxFit.cover,
+                )
+                    : null,
+                color: event.venueImages.isEmpty ? AppColors.grayBorder : null,
+              ),
+              child: event.venueImages.isEmpty
+                  ? const Icon(Icons.event, color: AppColors.primaryWhite)
+                  : null,
+            ),
 
-    const SizedBox(width: 16),
+            const SizedBox(width: 16),
 
-    // Event details
-    Expanded(
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    event.eventTitle,
-    style: const TextStyle(
-    color: AppColors.primaryWhite,
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-    ),
-    ),
-    const SizedBox(height: 4),
-    Row(
-    children: [
-    const Icon(
-    Icons.calendar_today_outlined,
-    color: AppColors.secondaryWhite,
-    size: 12,
-    ),
-    const SizedBox(width: 4),
-    Text(
-    DateFormat('MMM d, h:mm a').format(event.eventDateTime),
-    style: const TextStyle(
-    color: AppColors.secondaryWhite,
-    fontSize: 12,
-    ),
-    ),
-    ],
-    ),
-    const SizedBox(height: 4),
-    Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    // Host info
-    Row(
-    children: [
-    const Text(
-    'Host: ',
-    style: TextStyle(
-    color: AppColors.secondaryWhite,
-    fontSize: 12,
-    ),
-    ),
-    hostAsync.when(
-    data: (host) => Text(
-    host?.name ?? 'Unknown',
-    style: const TextStyle(
-    color: AppColors.primaryWhite,
-    fontSize: 12,
-    ),
-    ),
-    loading: () => const SizedBox(
-    width: 50,
-    height: 12,
-    child: LinearProgressIndicator(),
-    ),
-    error: (_, __) => const Text(
-    'Unknown',
-    style: TextStyle(
-    color: AppColors.primaryWhite,
-    fontSize: 12,
-    ),
-    ),
-    ),
-    ],
-    ),
+            // Event details
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.eventTitle,
+                    style: const TextStyle(
+                      color: AppColors.primaryWhite,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        color: AppColors.secondaryWhite,
+                        size: 12,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateFormat('MMM d, h:mm a').format(event.eventDateTime),
+                        style: const TextStyle(
+                          color: AppColors.secondaryWhite,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Host info
+                      Row(
+                        children: [
+                          const Text(
+                            'Host: ',
+                            style: TextStyle(
+                              color: AppColors.secondaryWhite,
+                              fontSize: 12,
+                            ),
+                          ),
+                          hostAsync.when(
+                            data: (host) => Text(
+                              host?.name ?? 'Unknown',
+                              style: const TextStyle(
+                                color: AppColors.primaryWhite,
+                                fontSize: 12,
+                              ),
+                            ),
+                            loading: () => const SizedBox(
+                              width: 50,
+                              height: 12,
+                              child: LinearProgressIndicator(),
+                            ),
+                            error: (_, __) => const Text(
+                              'Unknown',
+                              style: TextStyle(
+                                color: AppColors.primaryWhite,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
 
-    // Unread count
-    unreadCountAsync.when(
-    data: (count) {
-    if (count > 0) {
-    return Container(
-    padding: const EdgeInsets.symmetric(
-    horizontal: 8,
-    vertical: 2,
-    ),
-    decoration: BoxDecoration(
-    color: AppColors.primaryPink,
-    borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(
-    count > 99 ? '99+' : count.toString(),
-    style: const TextStyle(
-    color: Colors.white,
-    fontSize: 10,
-    fontWeight: FontWeight.bold,
-    ),
-    ),
+                      // Unread count
+                      unreadCountAsync.when(
+                        data: (count) {
+                          if (count > 0) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryPink,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                count > 99 ? '99+' : count.toString(),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                        loading: () => const SizedBox(
+                          width: 24,
+                          height: 16,
+                          child: Center(
+                            child: SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                        error: (_, __) => const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
+  }
+
+  Widget _buildEmptyState(
+      String title,
+      String subtitle,
+      IconData icon,
+      VoidCallback onActionPressed,
+      ) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: AppColors.secondaryWhite,
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.primaryWhite,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: AppColors.secondaryWhite,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: onActionPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryPink,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text('Get Started'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatChatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      if (difference.inDays > 6) {
+        return DateFormat('MMM d').format(dateTime);
+      } else {
+        return '${difference.inDays}d';
+      }
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m';
+    } else {
+      return 'now';
     }
-    return const Size
+  }
+}

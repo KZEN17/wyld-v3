@@ -220,22 +220,45 @@ class ChatRepository {
       rethrow;
     }
   }
-
-  // Get messages for a direct chat
-  Future<List<ChatMessage>> getDirectChatMessages(String chatId) async {
+// Add this to your repository code temporarily
+  Future<void> debugChatMessageFields() async {
     try {
       final response = await _db.listDocuments(
         databaseId: AppwriteConstants.databaseId,
         collectionId: AppwriteConstants.chatMessagesCollection,
+
+      );
+
+      if (response.documents.isNotEmpty) {
+        print("Available fields in chat message: ${response.documents[0].data.keys.join(', ')}");
+      } else {
+        print("No chat messages found for debugging");
+      }
+    } catch (e) {
+      print("Error debugging chat fields: $e");
+    }
+  }
+  Future<List<ChatMessage>> getDirectChatMessages(String chatId) async {
+    try {
+      final response = await _db.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.directChatCollection,
         queries: [
-          Query.equal('chatId', chatId),
+          Query.equal('chatId', chatId),  // Using the correct field name now
           Query.orderDesc('timestamp'),
         ],
       );
 
-      return response.documents
-          .map((doc) => ChatMessage.fromJson(doc.data))
-          .toList();
+      List<ChatMessage> messages = [];
+      for (var doc in response.documents) {
+        try {
+          messages.add(ChatMessage.fromJson(doc.data));
+        } catch (e) {
+          print("Error parsing message ${doc.$id}: $e");
+          // Skip invalid messages instead of failing the whole request
+        }
+      }
+      return messages;
     } catch (e) {
       if (kDebugMode) {
         print('Error getting direct chat messages: $e');
@@ -243,7 +266,6 @@ class ChatRepository {
       rethrow;
     }
   }
-
   // Upload image and send as a direct message
   Future<ChatMessage> sendDirectImageMessage({
     required String chatId,
