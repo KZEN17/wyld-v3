@@ -1,3 +1,5 @@
+// lib/features/chat/screens/direct_message_chat.dart
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,7 +12,6 @@ import '../../../shared/widgets/profile_avatar_widget.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../controllers/direct_chat_controller.dart';
 import '../data/models/chat_model.dart';
-import '../data/models/direct_message_model.dart';
 
 class DirectChatScreen extends ConsumerStatefulWidget {
   final String chatId;
@@ -42,7 +43,9 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
   @override
   Widget build(BuildContext context) {
     final otherUserAsync = ref.watch(userByIdProvider(widget.otherUserId));
-    final chatMessagesAsync = ref.watch(directChatMessagesProvider(widget.chatId));
+    final chatMessagesAsync = ref.watch(
+      directChatMessagesProvider(widget.chatId),
+    );
     final authState = ref.watch(authControllerProvider);
 
     // Loading states for user and auth data
@@ -97,12 +100,13 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
                 return _buildChatList(messages, currentUser.id);
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(
-                child: Text(
-                  'Error loading messages: $error',
-                  style: const TextStyle(color: Colors.red),
-                ),
-              ),
+              error:
+                  (error, _) => Center(
+                    child: Text(
+                      'Error loading messages: $error',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
             ),
           ),
 
@@ -138,13 +142,11 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
-              ),
+              ), // lib/features/chat/screens/direct_message_chat.dart (continued)
+
               const Text(
                 "Online", // This could be dynamic based on user status
-                style: TextStyle(
-                  color: AppColors.secondaryWhite,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: AppColors.secondaryWhite, fontSize: 12),
               ),
             ],
           ),
@@ -168,42 +170,55 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.person, color: AppColors.primaryWhite),
-              title: const Text('View Profile', style: TextStyle(color: AppColors.primaryWhite)),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.pushNamed(
-                  context,
-                  '/user-profile-view',
-                  arguments: widget.otherUserId,
-                );
-              },
+      builder:
+          (context) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  leading: const Icon(
+                    Icons.person,
+                    color: AppColors.primaryWhite,
+                  ),
+                  title: const Text(
+                    'View Profile',
+                    style: TextStyle(color: AppColors.primaryWhite),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushNamed(
+                      context,
+                      '/user-profile-view',
+                      arguments: widget.otherUserId,
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.block, color: Colors.red),
+                  title: const Text(
+                    'Block User',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Implement block user functionality
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.report, color: Colors.orange),
+                  title: const Text(
+                    'Report Conversation',
+                    style: TextStyle(color: Colors.orange),
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // Implement report functionality
+                  },
+                ),
+              ],
             ),
-            ListTile(
-              leading: const Icon(Icons.block, color: Colors.red),
-              title: const Text('Block User', style: TextStyle(color: Colors.red)),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement block user functionality
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.report, color: Colors.orange),
-              title: const Text('Report Conversation', style: TextStyle(color: Colors.orange)),
-              onTap: () {
-                Navigator.pop(context);
-                // Implement report functionality
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 
@@ -229,10 +244,7 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
           const SizedBox(height: 8),
           const Text(
             'Send a message to start the conversation!',
-            style: TextStyle(
-              color: AppColors.secondaryWhite,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: AppColors.secondaryWhite, fontSize: 14),
           ),
         ],
       ),
@@ -243,9 +255,14 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
     // Mark unread messages as read
     for (var message in messages) {
       if (!message.isRead && message.senderId != currentUserId) {
-        ref.read(directChatMessagesProvider(widget.chatId).notifier).markAsRead(message.id);
+        ref
+            .read(directChatMessagesProvider(widget.chatId).notifier)
+            .markAsRead(message.id);
       }
     }
+
+    // Also mark the chat as read
+    ref.read(userDirectChatsProvider.notifier).markChatAsRead(widget.chatId);
 
     return ListView.builder(
       controller: _scrollController,
@@ -257,8 +274,12 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
         final isMe = message.senderId == currentUserId;
 
         // Determine if we need to show a date header
-        final showDateHeader = index == messages.length - 1 ||
-            !_isSameDay(messages[index].timestamp, messages[index + 1].timestamp);
+        final showDateHeader =
+            index == messages.length - 1 ||
+            !_isSameDay(
+              messages[index].timestamp,
+              messages[index + 1].timestamp,
+            );
 
         return Column(
           children: [
@@ -317,15 +338,20 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
         child: Column(
-          crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          crossAxisAlignment:
+              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             // Message content
             Container(
-              padding: message.type == MessageType.text
-                  ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                  : const EdgeInsets.all(4),
+              padding:
+                  message.type == MessageType.text
+                      ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
+                      : const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: isMe ? AppColors.primaryPink : AppColors.secondaryBackground,
+                color:
+                    isMe
+                        ? AppColors.primaryPink
+                        : AppColors.secondaryBackground,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: _buildMessageContent(message),
@@ -354,9 +380,10 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
         return Text(
           message.content,
           style: TextStyle(
-            color: message.senderId == ref.read(authControllerProvider).value?.id
-                ? Colors.white
-                : AppColors.primaryWhite,
+            color:
+                message.senderId == ref.read(authControllerProvider).value?.id
+                    ? Colors.white
+                    : AppColors.primaryWhite,
             fontSize: 16,
           ),
         );
@@ -367,7 +394,8 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => FullScreenImageView(imageUrl: message.content),
+                builder:
+                    (context) => FullScreenImageView(imageUrl: message.content),
               ),
             );
           },
@@ -386,10 +414,11 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
                   color: AppColors.grayBorder,
                   child: Center(
                     child: CircularProgressIndicator(
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                          : null,
+                      value:
+                          loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
                     ),
                   ),
                 );
@@ -445,14 +474,14 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
           // Send button
           _isUploading
               ? const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
               : IconButton(
-            icon: const Icon(Icons.send, color: AppColors.primaryPink),
-            onPressed: _sendTextMessage,
-          ),
+                icon: const Icon(Icons.send, color: AppColors.primaryPink),
+                onPressed: _sendTextMessage,
+              ),
         ],
       ),
     );
@@ -468,19 +497,22 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
     try {
       _messageController.clear();
 
-      await ref.read(directChatMessagesProvider(widget.chatId).notifier).sendDirectMessage(
-        senderId: user.id,
-        senderName: user.name,
-        senderImage: user.profileImages.isNotEmpty ? user.profileImages[0] : '',
-        text: text,
-      );
+      await ref
+          .read(directChatMessagesProvider(widget.chatId).notifier)
+          .sendDirectMessage(
+            senderId: user.id,
+            senderName: user.name,
+            senderImage:
+                user.profileImages.isNotEmpty ? user.profileImages[0] : '',
+            text: text,
+          );
 
       // Scroll to bottom
       _scrollToBottom();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending message: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error sending message: $e')));
     }
   }
 
@@ -502,19 +534,22 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
         _isUploading = true;
       });
 
-      await ref.read(directChatMessagesProvider(widget.chatId).notifier).sendDirectImageMessage(
-        senderId: user.id,
-        senderName: user.name,
-        senderImage: user.profileImages.isNotEmpty ? user.profileImages[0] : '',
-        imageFile: File(image.path),
-      );
+      await ref
+          .read(directChatMessagesProvider(widget.chatId).notifier)
+          .sendDirectImageMessage(
+            senderId: user.id,
+            senderName: user.name,
+            senderImage:
+                user.profileImages.isNotEmpty ? user.profileImages[0] : '',
+            imageFile: File(image.path),
+          );
 
       // Scroll to bottom
       _scrollToBottom();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending image: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error sending image: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -542,7 +577,8 @@ class _DirectChatScreenState extends ConsumerState<DirectChatScreen> {
 class FullScreenImageView extends StatelessWidget {
   final String imageUrl;
 
-  const FullScreenImageView({Key? key, required this.imageUrl}) : super(key: key);
+  const FullScreenImageView({Key? key, required this.imageUrl})
+    : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -566,10 +602,11 @@ class FullScreenImageView extends StatelessWidget {
               if (loadingProgress == null) return child;
               return Center(
                 child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                      : null,
+                  value:
+                      loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
                 ),
               );
             },

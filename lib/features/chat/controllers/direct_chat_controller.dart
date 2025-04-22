@@ -1,4 +1,4 @@
-// New file: lib/features/chat/controllers/direct_chat_controller.dart
+// lib/features/chat/controllers/direct_chat_controller.dart
 
 import 'dart:async';
 import 'dart:io';
@@ -57,6 +57,8 @@ class DirectChatsController extends StateNotifier<AsyncValue<List<DirectMessageC
     _subscribeToDirectChats();
   }
 
+// lib/features/chat/controllers/direct_chat_controller.dart (continued)
+
   // Get all direct chats for a user
   Future<void> getUserChats(String userId) async {
     state = const AsyncValue.loading();
@@ -76,7 +78,7 @@ class DirectChatsController extends StateNotifier<AsyncValue<List<DirectMessageC
   void _subscribeToDirectChats() {
     try {
       _subscription = _realtimeService
-          .subscribeToCollection('direct_chats') // Add this to your constants
+          .subscribeToCollection(AppwriteConstants.directChatCollection)
           .listen((event) {
         if (_currentUserId == null) return;
 

@@ -93,13 +93,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 return _buildChatList(messages, user.id);
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error:
-                  (error, _) => Center(
-                    child: Text(
-                      'Error loading messages: $error',
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                  ),
+              error: (error, _) => Center(
+                child: Text(
+                  'Error loading messages: $error',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             ),
           ),
 
@@ -204,10 +203,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         // Determine if we need to show a date header
         final showDateHeader =
             index == messages.length - 1 ||
-            !_isSameDay(
-              messages[index].timestamp,
-              messages[index + 1].timestamp,
-            );
+                !_isSameDay(
+                  messages[index].timestamp,
+                  messages[index + 1].timestamp,
+                );
 
         return Column(
           children: [
@@ -267,7 +266,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
         child: Column(
           crossAxisAlignment:
-              isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+          isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             // Sender name (only for messages from others)
             if (!isMe)
@@ -304,17 +303,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       right: isMe ? 0 : 0,
                     ),
                     padding:
-                        message.type == MessageType.text
-                            ? const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            )
-                            : const EdgeInsets.all(4),
+                    message.type == MessageType.text
+                        ? const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    )
+                        : const EdgeInsets.all(4),
                     decoration: BoxDecoration(
                       color:
-                          isMe
-                              ? AppColors.primaryPink
-                              : AppColors.secondaryBackground,
+                      isMe
+                          ? AppColors.primaryPink
+                          : AppColors.secondaryBackground,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: _buildMessageContent(message),
@@ -350,9 +349,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           message.content,
           style: TextStyle(
             color:
-                message.senderId == ref.read(authControllerProvider).value?.id
-                    ? Colors.white
-                    : AppColors.primaryWhite,
+            message.senderId == ref.read(authControllerProvider).value?.id
+                ? Colors.white
+                : AppColors.primaryWhite,
             fontSize: 16,
           ),
         );
@@ -384,10 +383,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   child: Center(
                     child: CircularProgressIndicator(
                       value:
-                          loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
+                      loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                          loadingProgress.expectedTotalBytes!
+                          : null,
                     ),
                   ),
                 );
@@ -443,14 +442,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           // Send button
           _isUploading
               ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
               : IconButton(
-                icon: const Icon(Icons.send, color: AppColors.primaryPink),
-                onPressed: _sendTextMessage,
-              ),
+            icon: const Icon(Icons.send, color: AppColors.primaryPink),
+            onPressed: _sendTextMessage,
+          ),
         ],
       ),
     );
@@ -469,12 +468,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       await ref
           .read(eventChatProvider(widget.eventId).notifier)
           .sendTextMessage(
-            senderId: user.id,
-            senderName: user.name,
-            senderImage:
-                user.profileImages.isNotEmpty ? user.profileImages[0] : '',
-            text: text,
-          );
+        senderId: user.id,
+        senderName: user.name,
+        senderImage:
+        user.profileImages.isNotEmpty ? user.profileImages[0] : '',
+        text: text,
+      );
 
       // Scroll to bottom
       _scrollToBottom();
@@ -506,12 +505,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       await ref
           .read(eventChatProvider(widget.eventId).notifier)
           .sendImageMessage(
-            senderId: user.id,
-            senderName: user.name,
-            senderImage:
-                user.profileImages.isNotEmpty ? user.profileImages[0] : '',
-            imageFile: File(image.path),
-          );
+        senderId: user.id,
+        senderName: user.name,
+        senderImage:
+        user.profileImages.isNotEmpty ? user.profileImages[0] : '',
+        imageFile: File(image.path),
+      );
 
       // Scroll to bottom
       _scrollToBottom();
@@ -547,7 +546,7 @@ class FullScreenImageView extends StatelessWidget {
   final String imageUrl;
 
   const FullScreenImageView({Key? key, required this.imageUrl})
-    : super(key: key);
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -572,10 +571,10 @@ class FullScreenImageView extends StatelessWidget {
               return Center(
                 child: CircularProgressIndicator(
                   value:
-                      loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
+                  loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                      : null,
                 ),
               );
             },

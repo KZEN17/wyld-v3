@@ -1,4 +1,4 @@
-// Update to lib/features/chat/screens/main_chat_screen.dart
+// lib/features/chat/screens/main_chat_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -115,20 +115,9 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
                   children: [
                     // Event Chats Tab
                     _buildEventChatsTab(user.id),
+
                     // Direct Messages Tab
-                    // _buildDirectMessagesTab(user.id),
-                    Column(
-                      children: [
-                        Text(
-                          'Coming Soon!',
-                          style: GoogleFonts.montserrat(
-                            color: AppColors.primaryWhite,
-                            fontSize: 36.0,
-                          ),
-                        ),
-                        Image.asset('assets/gif/coming-soon.gif'),
-                      ],
-                    ),
+                    _buildDirectMessagesTab(user.id),
                   ],
                 ),
               ),
@@ -136,13 +125,12 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error:
-            (_, __) => const Center(
-              child: Text(
-                'Error loading user data',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
+        error: (_, __) => const Center(
+          child: Text(
+            'Error loading user data',
+            style: TextStyle(color: Colors.red),
+          ),
+        ),
       ),
     );
   }
@@ -157,31 +145,31 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
             'No direct messages',
             'Start a conversation with a friend',
             Icons.chat_bubble_outline,
-            () {
+                () {
               // Navigate to friends list to start a new chat
-              // Navigator.pushNamed(context, '/friend-requests');
+              Navigator.pushNamed(context, '/friend-requests');
             },
           );
         }
 
         // Filter chats based on search query if needed
         final filteredChats =
-            _searchController.text.isEmpty
-                ? chats
-                : chats.where((chat) {
-                  // Get the other participant's data and check if name contains search query
-                  final otherUserId = chat.participants.firstWhere(
-                    (id) => id != userId,
-                    orElse: () => '',
-                  );
-                  final userAsync = ref.read(userByIdProvider(otherUserId));
-                  if (userAsync.hasValue && userAsync.value != null) {
-                    return userAsync.value!.name.toLowerCase().contains(
-                      _searchController.text.toLowerCase(),
-                    );
-                  }
-                  return false;
-                }).toList();
+        _searchController.text.isEmpty
+            ? chats
+            : chats.where((chat) {
+          // Get the other participant's data and check if name contains search query
+          final otherUserId = chat.participants.firstWhere(
+                (id) => id != userId,
+            orElse: () => '',
+          );
+          final userAsync = ref.read(userByIdProvider(otherUserId));
+          if (userAsync.hasValue && userAsync.value != null) {
+            return userAsync.value!.name.toLowerCase().contains(
+              _searchController.text.toLowerCase(),
+            );
+          }
+          return false;
+        }).toList();
 
         if (filteredChats.isEmpty) {
           return Center(
@@ -202,20 +190,19 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, _) => Center(
-            child: Text(
-              'Error loading direct messages: $error',
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
+      error: (error, _) => Center(
+        child: Text(
+          'Error loading direct messages: $error',
+          style: const TextStyle(color: Colors.red),
+        ),
+      ),
     );
   }
 
   Widget _buildDirectChatItem(DirectMessageChat chat, String currentUserId) {
     // Find the other participant's ID
     final otherUserId = chat.participants.firstWhere(
-      (id) => id != currentUserId,
+          (id) => id != currentUserId,
       orElse: () => '',
     );
 
@@ -251,14 +238,14 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color:
-                  isUnread
-                      ? AppColors.secondaryBackground.withOpacity(0.7)
-                      : AppColors.secondaryBackground,
+              isUnread
+                  ? AppColors.secondaryBackground.withOpacity(0.7)
+                  : AppColors.secondaryBackground,
               borderRadius: BorderRadius.circular(12),
               border:
-                  isUnread
-                      ? Border.all(color: AppColors.primaryPink, width: 1)
-                      : null,
+              isUnread
+                  ? Border.all(color: AppColors.primaryPink, width: 1)
+                  : null,
             ),
             child: Row(
               children: [
@@ -284,9 +271,9 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
                             style: TextStyle(
                               color: AppColors.primaryWhite,
                               fontWeight:
-                                  isUnread
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                              isUnread
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
                               fontSize: 16,
                             ),
                           ),
@@ -294,9 +281,9 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
                             formattedTime,
                             style: TextStyle(
                               color:
-                                  isUnread
-                                      ? AppColors.primaryPink
-                                      : AppColors.secondaryWhite,
+                              isUnread
+                                  ? AppColors.primaryPink
+                                  : AppColors.secondaryWhite,
                               fontSize: 12,
                             ),
                           ),
@@ -314,13 +301,13 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color:
-                                    isUnread
-                                        ? AppColors.primaryWhite
-                                        : AppColors.secondaryWhite,
+                                isUnread
+                                    ? AppColors.primaryWhite
+                                    : AppColors.secondaryWhite,
                                 fontWeight:
-                                    isUnread
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                                isUnread
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
                                 fontSize: 14,
                               ),
                             ),
@@ -344,11 +331,10 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
           ),
         );
       },
-      loading:
-          () => const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(child: CircularProgressIndicator()),
-          ),
+      loading: () => const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Center(child: CircularProgressIndicator()),
+      ),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
@@ -360,24 +346,21 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
       data: (events) {
         // Filter events where the user is a participant (either as host or guest)
         final participatingEvents =
-            events
-                .where(
-                  (event) =>
-                      event.hostId == userId || event.guestsId.contains(userId),
-                )
-                .toList();
+        events.where((event) =>
+        event.hostId == userId || event.guestsId.contains(userId),
+        ).toList();
 
         if (participatingEvents.isEmpty) {
           return _buildEmptyState(
             'No event chats',
             'Join or host an event to start chatting',
             Icons.event_available,
-            () {
+                () {
               // Navigate to explore tab
               Navigator.pushNamedAndRemoveUntil(
                 context,
                 '/home',
-                (route) => false,
+                    (route) => false,
               );
             },
           );
@@ -385,13 +368,13 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
 
         // Filter events based on search query if needed
         final filteredEvents =
-            _searchController.text.isEmpty
-                ? participatingEvents
-                : participatingEvents.where((event) {
-                  return event.eventTitle.toLowerCase().contains(
-                    _searchController.text.toLowerCase(),
-                  );
-                }).toList();
+        _searchController.text.isEmpty
+            ? participatingEvents
+            : participatingEvents.where((event) {
+          return event.eventTitle.toLowerCase().contains(
+            _searchController.text.toLowerCase(),
+          );
+        }).toList();
 
         if (filteredEvents.isEmpty) {
           return Center(
@@ -404,7 +387,7 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
 
         // Sort by date (most recent first)
         filteredEvents.sort(
-          (a, b) => b.eventDateTime.compareTo(a.eventDateTime),
+              (a, b) => b.eventDateTime.compareTo(a.eventDateTime),
         );
 
         return ListView.builder(
@@ -417,13 +400,12 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (error, _) => Center(
-            child: Text(
-              'Error loading events: $error',
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
+      error: (error, _) => Center(
+        child: Text(
+          'Error loading events: $error',
+          style: const TextStyle(color: Colors.red),
+        ),
+      ),
     );
   }
 
@@ -434,213 +416,130 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen>
     final hostAsync = ref.watch(userByIdProvider(event.hostId));
 
     return InkWell(
-      onTap: () {
-        // Navigate to event chat screen
-        Navigator.pushNamed(context, '/chat', arguments: event.eventId);
-      },
-      child: Container(
+        onTap: () {
+          // Navigate to event chat screen
+          Navigator.pushNamed(context, '/chat', arguments: event.eventId);
+        },
+        child: Container(
         margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.secondaryBackground,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            // Event image
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                image:
-                    event.venueImages.isNotEmpty
-                        ? DecorationImage(
-                          image: NetworkImage(event.venueImages[0]),
-                          fit: BoxFit.cover,
-                        )
-                        : null,
-                color: event.venueImages.isEmpty ? AppColors.grayBorder : null,
-              ),
-              child:
-                  event.venueImages.isEmpty
-                      ? const Icon(Icons.event, color: AppColors.primaryWhite)
-                      : null,
-            ),
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+    color: AppColors.secondaryBackground,
+    borderRadius: BorderRadius.circular(12),
+    ),
+    child: Row(
+    children: [
+    // Event image
+    Container(
+    width: 60,
+    height: 60,
+    decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(12),
+    image: event.venueImages.isNotEmpty
+    ? DecorationImage(
+    image: NetworkImage(event.venueImages[0]),
+    fit: BoxFit.cover,
+    )
+        : null,
+    color: event.venueImages.isEmpty ? AppColors.grayBorder : null,
+    ),
+    child: event.venueImages.isEmpty
+    ? const Icon(Icons.event, color: AppColors.primaryWhite)
+        : null,
+    ),
 
-            const SizedBox(width: 16),
+    const SizedBox(width: 16),
 
-            // Event details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    event.eventTitle,
-                    style: const TextStyle(
-                      color: AppColors.primaryWhite,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.calendar_today_outlined,
-                        color: AppColors.secondaryWhite,
-                        size: 12,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        DateFormat('MMM d, h:mm a').format(event.eventDateTime),
-                        style: const TextStyle(
-                          color: AppColors.secondaryWhite,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Host info
-                      Row(
-                        children: [
-                          const Text(
-                            'Host: ',
-                            style: TextStyle(
-                              color: AppColors.secondaryWhite,
-                              fontSize: 12,
-                            ),
-                          ),
-                          hostAsync.when(
-                            data:
-                                (host) => Text(
-                                  host?.name ?? 'Unknown',
-                                  style: const TextStyle(
-                                    color: AppColors.primaryWhite,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                            loading:
-                                () => const SizedBox(
-                                  width: 50,
-                                  height: 12,
-                                  child: LinearProgressIndicator(),
-                                ),
-                            error:
-                                (_, __) => const Text(
-                                  'Unknown',
-                                  style: TextStyle(
-                                    color: AppColors.primaryWhite,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                          ),
-                        ],
-                      ),
+    // Event details
+    Expanded(
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    Text(
+    event.eventTitle,
+    style: const TextStyle(
+    color: AppColors.primaryWhite,
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    ),
+    ),
+    const SizedBox(height: 4),
+    Row(
+    children: [
+    const Icon(
+    Icons.calendar_today_outlined,
+    color: AppColors.secondaryWhite,
+    size: 12,
+    ),
+    const SizedBox(width: 4),
+    Text(
+    DateFormat('MMM d, h:mm a').format(event.eventDateTime),
+    style: const TextStyle(
+    color: AppColors.secondaryWhite,
+    fontSize: 12,
+    ),
+    ),
+    ],
+    ),
+    const SizedBox(height: 4),
+    Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+    // Host info
+    Row(
+    children: [
+    const Text(
+    'Host: ',
+    style: TextStyle(
+    color: AppColors.secondaryWhite,
+    fontSize: 12,
+    ),
+    ),
+    hostAsync.when(
+    data: (host) => Text(
+    host?.name ?? 'Unknown',
+    style: const TextStyle(
+    color: AppColors.primaryWhite,
+    fontSize: 12,
+    ),
+    ),
+    loading: () => const SizedBox(
+    width: 50,
+    height: 12,
+    child: LinearProgressIndicator(),
+    ),
+    error: (_, __) => const Text(
+    'Unknown',
+    style: TextStyle(
+    color: AppColors.primaryWhite,
+    fontSize: 12,
+    ),
+    ),
+    ),
+    ],
+    ),
 
-                      // Unread count
-                      unreadCountAsync.when(
-                        data: (count) {
-                          if (count > 0) {
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryPink,
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                count > 99 ? '99+' : count.toString(),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            );
-                          }
-                          return const SizedBox.shrink();
-                        },
-                        loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
+    // Unread count
+    unreadCountAsync.when(
+    data: (count) {
+    if (count > 0) {
+    return Container(
+    padding: const EdgeInsets.symmetric(
+    horizontal: 8,
+    vertical: 2,
+    ),
+    decoration: BoxDecoration(
+    color: AppColors.primaryPink,
+    borderRadius: BorderRadius.circular(10),
+    ),
+    child: Text(
+    count > 99 ? '99+' : count.toString(),
+    style: const TextStyle(
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: FontWeight.bold,
+    ),
+    ),
     );
-  }
-
-  Widget _buildEmptyState(
-    String title,
-    String subtitle,
-    IconData icon,
-    VoidCallback onActionPressed,
-  ) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: AppColors.secondaryWhite, size: 64),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: const TextStyle(
-              color: AppColors.primaryWhite,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: const TextStyle(
-              color: AppColors.secondaryWhite,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: onActionPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryPink,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
-              ),
-            ),
-            child: const Text('Get Started'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatChatTime(DateTime time) {
-    final now = DateTime.now();
-    final difference = now.difference(time);
-
-    if (difference.inDays > 7) {
-      return DateFormat('MM/dd/yy').format(time);
-    } else if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'now';
     }
-  }
-}
+    return const Size

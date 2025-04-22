@@ -1,4 +1,4 @@
-// New file: lib/features/chat/data/models/direct_message_model.dart
+// lib/features/chat/data/models/direct_message_model.dart
 
 import 'package:uuid/uuid.dart';
 

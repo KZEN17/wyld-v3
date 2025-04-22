@@ -1,4 +1,4 @@
-// Update to lib/features/chat/data/models/chat_model.dart
+// lib/features/chat/data/models/chat_model.dart
 
 import 'package:uuid/uuid.dart';
 
@@ -9,8 +9,8 @@ enum MessageType {
 
 class ChatMessage {
   final String id;
-  final String? eventId; // Optional for event chats
-  final String? chatId;  // Optional for direct chats
+  final String? eventId; // For event chats
+  final String? chatId;  // For direct chats
   final String senderId;
   final String senderName;
   final String senderImage;
