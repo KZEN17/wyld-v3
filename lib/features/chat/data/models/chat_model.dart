@@ -1,3 +1,5 @@
+// Update to lib/features/chat/data/models/chat_model.dart
+
 import 'package:uuid/uuid.dart';
 
 enum MessageType {
@@ -7,7 +9,8 @@ enum MessageType {
 
 class ChatMessage {
   final String id;
-  final String eventId;
+  final String? eventId; // Optional for event chats
+  final String? chatId;  // Optional for direct chats
   final String senderId;
   final String senderName;
   final String senderImage;
@@ -18,7 +21,8 @@ class ChatMessage {
 
   ChatMessage({
     required this.id,
-    required this.eventId,
+    this.eventId,
+    this.chatId,
     required this.senderId,
     required this.senderName,
     required this.senderImage,
@@ -28,7 +32,7 @@ class ChatMessage {
     this.isRead = false,
   });
 
-  // Factory method to create a new text message
+  // Factory method to create a new text message for an event
   factory ChatMessage.createText({
     required String eventId,
     required String senderId,
@@ -48,7 +52,7 @@ class ChatMessage {
     );
   }
 
-  // Factory method to create a new image message
+  // Factory method to create a new image message for an event
   factory ChatMessage.createImage({
     required String eventId,
     required String senderId,
@@ -68,11 +72,50 @@ class ChatMessage {
     );
   }
 
+  // Factory method to create a new direct text message
+  factory ChatMessage.createDirectMessage({
+    required String chatId,
+    required String senderId,
+    required String senderName,
+    required String senderImage,
+    required String text,
+  }) {
+    return ChatMessage(
+      id: const Uuid().v4(),
+      chatId: chatId,
+      senderId: senderId,
+      senderName: senderName,
+      senderImage: senderImage,
+      content: text,
+      type: MessageType.text,
+      timestamp: DateTime.now(),
+    );
+  }
+
+  // Factory method to create a new direct image message
+  factory ChatMessage.createDirectImageMessage({
+    required String chatId,
+    required String senderId,
+    required String senderName,
+    required String senderImage,
+    required String imageUrl,
+  }) {
+    return ChatMessage(
+      id: const Uuid().v4(),
+      chatId: chatId,
+      senderId: senderId,
+      senderName: senderName,
+      senderImage: senderImage,
+      content: imageUrl,
+      type: MessageType.image,
+      timestamp: DateTime.now(),
+    );
+  }
+
   // Convert to JSON for Appwrite
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'id': id,
-      'eventId': eventId,
       'senderId': senderId,
       'senderName': senderName,
       'senderImage': senderImage,
@@ -81,13 +124,20 @@ class ChatMessage {
       'timestamp': timestamp.toIso8601String(),
       'isRead': isRead,
     };
+
+    // Add optional fields if they exist
+    if (eventId != null) data['eventId'] = eventId;
+    if (chatId != null) data['chatId'] = chatId;
+
+    return data;
   }
 
   // Create from JSON from Appwrite
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       id: json['id'] as String,
-      eventId: json['eventId'] as String,
+      eventId: json['eventId'] as String?,
+      chatId: json['chatId'] as String?,
       senderId: json['senderId'] as String,
       senderName: json['senderName'] as String,
       senderImage: json['senderImage'] as String,
@@ -105,6 +155,7 @@ class ChatMessage {
     return ChatMessage(
       id: id,
       eventId: eventId,
+      chatId: chatId,
       senderId: senderId,
       senderName: senderName,
       senderImage: senderImage,

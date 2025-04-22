@@ -217,35 +217,50 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
               ),
     );
   }
+// Update in lib/features/profile/screens/profile_view.dart
 
   Widget _buildProfileHeader(UserModel user) {
-    final hasProfileImage = user.profileImages.isNotEmpty;
-
     return ListTile(
       contentPadding: const EdgeInsets.all(0),
       leading: CircleAvatar(
         radius: 50.0,
         backgroundColor: AppColors.secondaryBackground,
         backgroundImage:
-            hasProfileImage ? NetworkImage(user.profileImages[0]) : null,
+        user.profileImages.isNotEmpty ? NetworkImage(user.profileImages[0]) : null,
         child:
-            !hasProfileImage
-                ? const Icon(Icons.person, color: AppColors.primaryWhite)
-                : null,
+        !user.profileImages.isNotEmpty
+            ? const Icon(Icons.person, color: AppColors.primaryWhite)
+            : null,
       ),
-      trailing: SizedBox(
-        height: 50.0,
-        width: 50.0,
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).pushNamed('/profile-settings');
-          },
-          child: const Icon(
-            Icons.settings_outlined,
-            color: AppColors.secondaryWhite,
-            size: 25.0,
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Add Edit Profile Button
+          IconButton(
+            icon: const Icon(
+              Icons.edit,
+              color: AppColors.primaryPink,
+              size: 25.0,
+            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/profile-edit');
+            },
+            tooltip: 'Edit Profile',
           ),
-        ),
+          const SizedBox(width: 8),
+          // Settings Button
+          IconButton(
+            icon: const Icon(
+              Icons.settings_outlined,
+              color: AppColors.secondaryWhite,
+              size: 25.0,
+            ),
+            onPressed: () {
+              Navigator.of(context).pushNamed('/profile-settings');
+            },
+            tooltip: 'Settings',
+          ),
+        ],
       ),
       title: Text(
         user.name,
@@ -262,7 +277,7 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
             Icon(Icons.location_on, color: AppColors.primaryWhite),
             SizedBox(width: 10.0),
             Text(
-              'Nashville, Tx',
+              'Nashville, TN',
               style: TextStyle(
                 color: AppColors.primaryWhite,
                 fontSize: 16.0,
@@ -274,6 +289,62 @@ class _ProfileViewState extends ConsumerState<ProfileView> {
       ),
     );
   }
+  // Widget _buildProfileHeader(UserModel user) {
+  //   final hasProfileImage = user.profileImages.isNotEmpty;
+  //
+  //   return ListTile(
+  //     contentPadding: const EdgeInsets.all(0),
+  //     leading: CircleAvatar(
+  //       radius: 50.0,
+  //       backgroundColor: AppColors.secondaryBackground,
+  //       backgroundImage:
+  //           hasProfileImage ? NetworkImage(user.profileImages[0]) : null,
+  //       child:
+  //           !hasProfileImage
+  //               ? const Icon(Icons.person, color: AppColors.primaryWhite)
+  //               : null,
+  //     ),
+  //     trailing: SizedBox(
+  //       height: 50.0,
+  //       width: 50.0,
+  //       child: GestureDetector(
+  //         onTap: () {
+  //           Navigator.of(context).pushNamed('/profile-settings');
+  //         },
+  //         child: const Icon(
+  //           Icons.settings_outlined,
+  //           color: AppColors.secondaryWhite,
+  //           size: 25.0,
+  //         ),
+  //       ),
+  //     ),
+  //     title: Text(
+  //       user.name,
+  //       style: const TextStyle(
+  //         color: AppColors.primaryWhite,
+  //         fontSize: 28.0,
+  //         fontWeight: FontWeight.w600,
+  //       ),
+  //     ),
+  //     subtitle: const Padding(
+  //       padding: EdgeInsets.only(top: 5.0),
+  //       child: Row(
+  //         children: [
+  //           Icon(Icons.location_on, color: AppColors.primaryWhite),
+  //           SizedBox(width: 10.0),
+  //           Text(
+  //             'Nashville, Tx',
+  //             style: TextStyle(
+  //               color: AppColors.primaryWhite,
+  //               fontSize: 16.0,
+  //               fontWeight: FontWeight.w200,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildBioSection(UserModel user) {
     return Column(

@@ -10,6 +10,7 @@ class AppwriteConstants {
   static const String commentsCollection = '6805fd2c0023c9d43b5f';
   static const String chatMessagesCollection = '680660040023de0642e4';
   static const String friendRequestsCollection = '68073665003250f1ccc5';
+  static const String directChatCollection = '68073b18002fb1e7b4a9';
   static const String imagesBucket = '67fe5500000d190168e9';
   static const String eventImagesBucket = '67ffba4800250225e31c';
   static const String chatImagesBucket = '68065fdb0024cb79cf59';
