@@ -53,26 +53,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         SvgPicture.asset('assets/svg/location.svg', height: 30.0, width: 30.0),
         Padding(
           padding: const EdgeInsets.only(left: 15.0),
-          child: SizedBox(
-            height: 30.0,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: badges.Badge(
-                  badgeStyle: const badges.BadgeStyle(
-                    badgeGradient: badges.BadgeGradient.linear(
-                      colors: [
-                        Color.fromRGBO(208, 54, 150, 1.0),
-                        Color.fromRGBO(215, 59, 84, 1.0),
-                      ],
+          child: GestureDetector(
+            onTap: (){
+              Navigator.of(context).pushNamed('/notifications');
+            },
+            child: SizedBox(
+              height: 30.0,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: badges.Badge(
+                    badgeStyle: const badges.BadgeStyle(
+                      badgeGradient: badges.BadgeGradient.linear(
+                        colors: [
+                          Color.fromRGBO(208, 54, 150, 1.0),
+                          Color.fromRGBO(215, 59, 84, 1.0),
+                        ],
+                      ),
                     ),
-                  ),
-                  position: badges.BadgePosition.topStart(),
-                  badgeContent: const Text('7'),
-                  child: const Icon(
-                    Icons.notifications_none_outlined,
-                    color: AppColors.primaryWhite,
-                    size: 30.0,
+                    position: badges.BadgePosition.topStart(),
+                    badgeContent: const Text(' '),
+                    child: const Icon(
+                      Icons.notifications_none_outlined,
+                      color: AppColors.primaryWhite,
+                      size: 30.0,
+                    ),
                   ),
                 ),
               ),

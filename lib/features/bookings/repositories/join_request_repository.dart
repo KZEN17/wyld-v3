@@ -113,7 +113,21 @@ class JoinRequestRepository {
       rethrow;
     }
   }
+  // Get all requests (used for finding specific request by ID)
+  Future<List<JoinRequest>> getAllRequests() async {
+    try {
+      final documents = await _db.listDocuments(
+        databaseId: AppwriteConstants.databaseId,
+        collectionId: AppwriteConstants.joinRequestsCollection,
+      );
 
+      return documents.documents
+          .map((doc) => JoinRequest.fromJson(doc.data))
+          .toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
   // Check if a user has a pending request for an event
   Future<bool> userHasPendingRequest(String userId, String eventId) async {
     try {

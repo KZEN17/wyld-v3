@@ -146,6 +146,7 @@
 //   }
 // }
 import 'package:flutter/material.dart';
+import 'package:wyld/features/notifications/screens/notifications_screen.dart';
 
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/onboarding_screen.dart';
@@ -193,6 +194,7 @@ class AppRoutes {
   static const String userProfileView = '/user-profile-view';
   static const String profileEdit = '/profile-edit';
   static const String friendRequests = '/friend-requests';
+  static const String notifications = '/notifications';
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments;
 
@@ -205,6 +207,9 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      case notifications:
+        return MaterialPageRoute(builder: (_) => const NotificationsScreen());
+
       case profileView:
         return MaterialPageRoute(builder: (_) => const ProfileView());
       case profileSettings:

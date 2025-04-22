@@ -143,7 +143,7 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
               Icons.chat_bubble_outline,
                   () {
                 // Navigate to friends list to start a new chat
-                Navigator.pushNamed(context, '/friend-requests');
+                // Navigator.pushNamed(context, '/friend-requests');
               }
           );
         }

@@ -1,119 +1,139 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../core/constants/app_colors.dart';
 import '../../features/auth/controllers/auth_controller.dart';
+import '../../features/auth/models/user_model.dart';
 
 class ProfileAvatar extends ConsumerWidget {
   final String userId;
   final double radius;
   final bool showOnlineIndicator;
-  final VoidCallback? onTap;
+  final bool showFriendIndicator;
 
   const ProfileAvatar({
     super.key,
     required this.userId,
-    this.radius = 25,
+    this.radius = 30,
     this.showOnlineIndicator = false,
-    this.onTap,
+    this.showFriendIndicator = true,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final userAsync = ref.watch(userByIdProvider(userId));
+    final currentUserAsync = ref.watch(authControllerProvider);
 
-    return GestureDetector(
-      onTap: onTap ?? () {
-        // Default action is to navigate to user profile
-        Navigator.of(context).pushNamed('/user-profile-view', arguments: userId);
+    return userAsync.when(
+      data: (user) {
+        if (user == null) {
+          return _buildDefaultAvatar();
+        }
+
+        // Check if the user is a friend of the current user
+        final currentUser = currentUserAsync.value;
+        final isFriend = currentUser != null &&
+            currentUser.friendsList.contains(userId);
+
+        return _buildProfileAvatar(user, isFriend);
       },
-      child: Stack(
-        children: [
-          userAsync.when(
-            data: (user) {
-              if (user == null) {
-                return _buildDefaultAvatar();
-              }
-
-              return CircleAvatar(
-                radius: radius,
-                backgroundColor: AppColors.secondaryBackground,
-                backgroundImage: user.profileImages.isNotEmpty
-                    ? NetworkImage(user.profileImages[0])
-                    : (user.userImages.isNotEmpty
-                    ? NetworkImage(user.userImages[0])
-                    : null),
-                child: user.profileImages.isEmpty && user.userImages.isEmpty
-                    ? Icon(
-                  Icons.person,
-                  color: AppColors.primaryWhite,
-                  size: radius * 0.8,
-                )
-                    : null,
-              );
-            },
-            loading: () => _buildLoadingAvatar(),
-            error: (_, __) => _buildErrorAvatar(),
-          ),
-
-          // Online indicator
-          if (showOnlineIndicator)
-            Positioned(
-              bottom: 0,
-              right: 0,
-              child: Container(
-                width: radius * 0.3,
-                height: radius * 0.3,
-                decoration: BoxDecoration(
-                  color: Colors.green,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.primaryBackground,
-                    width: 2,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
+      loading: () => _buildLoadingAvatar(),
+      error: (_, __) => _buildDefaultAvatar(),
     );
   }
 
+  Widget _buildProfileAvatar(UserModel user, bool isFriend) {
+    // Determine the image URL
+    final imageUrl = user.profileImages.isNotEmpty
+        ? user.profileImages[0]
+        : (user.userImages.isNotEmpty ? user.userImages[0] : '');
+
+    // Build the avatar container
+    Widget avatarWidget = Container(
+      width: radius * 2,
+      height: radius * 2,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: isFriend && showFriendIndicator
+            ? Border.all(
+          color: AppColors.primaryPink,
+          width: 3.0,
+        )
+            : null,
+        image: imageUrl.isNotEmpty
+            ? DecorationImage(
+          image: NetworkImage(imageUrl),
+          fit: BoxFit.cover,
+        )
+            : null,
+        color: imageUrl.isEmpty ? AppColors.grayBorder : null,
+      ),
+      child: imageUrl.isEmpty
+          ? Icon(
+        Icons.person,
+        color: AppColors.primaryWhite,
+        size: radius,
+      )
+          : null,
+    );
+
+    // Add online indicator if required
+    if (showOnlineIndicator) {
+      avatarWidget = Stack(
+        children: [
+          avatarWidget,
+          Positioned(
+            bottom: 0,
+            right: 0,
+            child: Container(
+              width: radius / 1.5,
+              height: radius / 1.5,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.green,
+                border: Border.all(
+                  color: AppColors.primaryBackground,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return avatarWidget;
+  }
+
   Widget _buildDefaultAvatar() {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.secondaryBackground,
+    return Container(
+      width: radius * 2,
+      height: radius * 2,
+      decoration: const BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.grayBorder,
+      ),
       child: Icon(
         Icons.person,
         color: AppColors.primaryWhite,
-        size: radius * 0.8,
+        size: radius,
       ),
     );
   }
 
   Widget _buildLoadingAvatar() {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.secondaryBackground,
-      child: SizedBox(
-        width: radius * 0.8,
-        height: radius * 0.8,
-        child: const CircularProgressIndicator(
+    return Container(
+      width: radius * 2,
+      height: radius * 2,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.secondaryBackground,
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryPink),
         ),
-      ),
-    );
-  }
-
-  Widget _buildErrorAvatar() {
-    return CircleAvatar(
-      radius: radius,
-      backgroundColor: AppColors.secondaryBackground,
-      child: Icon(
-        Icons.error,
-        color: Colors.red,
-        size: radius * 0.8,
       ),
     );
   }

@@ -58,9 +58,14 @@ class DirectMessageChat {
 
   // Create from JSON from Appwrite
   factory DirectMessageChat.fromJson(Map<String, dynamic> json) {
+    // Ensure participants is always a list of strings
+    final participants = json['participants'] is List
+        ? List<String>.from(json['participants'])
+        : [];
+
     return DirectMessageChat(
       chatId: json['chatId'] as String,
-      participants: List<String>.from(json['participants']),
+      participants: participants as List<String>,
       lastMessageTime: DateTime.parse(json['lastMessageTime'] as String),
       lastMessage: json['lastMessage'] as String,
       lastSenderId: json['lastSenderId'] as String,
