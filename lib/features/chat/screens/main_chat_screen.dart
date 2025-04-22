@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/app_colors.dart';
@@ -20,7 +21,8 @@ class MainChatScreen extends ConsumerStatefulWidget {
   ConsumerState<MainChatScreen> createState() => _MainChatScreenState();
 }
 
-class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTickerProviderStateMixin {
+class _MainChatScreenState extends ConsumerState<MainChatScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
 
@@ -33,7 +35,9 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
     Future.delayed(Duration.zero, () {
       final authState = ref.read(authControllerProvider);
       if (authState.hasValue && authState.value != null) {
-        ref.read(userDirectChatsProvider.notifier).initialize(authState.value!.id);
+        ref
+            .read(userDirectChatsProvider.notifier)
+            .initialize(authState.value!.id);
       }
     });
   }
@@ -65,10 +69,7 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
           indicatorColor: AppColors.primaryPink,
           labelColor: AppColors.primaryPink,
           unselectedLabelColor: AppColors.secondaryWhite,
-          tabs: const [
-            Tab(text: 'Direct Messages'),
-            Tab(text: 'Event Chats'),
-          ],
+          tabs: const [Tab(text: 'Event Chats'), Tab(text: 'Direct Messages')],
         ),
       ),
       body: authState.when(
@@ -93,7 +94,10 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
                   decoration: InputDecoration(
                     hintText: 'Search conversations...',
                     hintStyle: const TextStyle(color: AppColors.secondaryWhite),
-                    prefixIcon: const Icon(Icons.search, color: AppColors.secondaryWhite),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.secondaryWhite,
+                    ),
                     filled: true,
                     fillColor: AppColors.secondaryBackground,
                     border: OutlineInputBorder(
@@ -109,11 +113,22 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    // Direct Messages Tab
-                    _buildDirectMessagesTab(user.id),
-
                     // Event Chats Tab
                     _buildEventChatsTab(user.id),
+                    // Direct Messages Tab
+                    // _buildDirectMessagesTab(user.id),
+                    Column(
+                      children: [
+                        Text(
+                          'Coming Soon!',
+                          style: GoogleFonts.montserrat(
+                            color: AppColors.primaryWhite,
+                            fontSize: 36.0,
+                          ),
+                        ),
+                        Image.asset('assets/gif/coming-soon.gif'),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -121,12 +136,13 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(
-          child: Text(
-            'Error loading user data',
-            style: TextStyle(color: Colors.red),
-          ),
-        ),
+        error:
+            (_, __) => const Center(
+              child: Text(
+                'Error loading user data',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
       ),
     );
   }
@@ -138,33 +154,34 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
       data: (chats) {
         if (chats.isEmpty) {
           return _buildEmptyState(
-              'No direct messages',
-              'Start a conversation with a friend',
-              Icons.chat_bubble_outline,
-                  () {
-                // Navigate to friends list to start a new chat
-                // Navigator.pushNamed(context, '/friend-requests');
-              }
+            'No direct messages',
+            'Start a conversation with a friend',
+            Icons.chat_bubble_outline,
+            () {
+              // Navigate to friends list to start a new chat
+              // Navigator.pushNamed(context, '/friend-requests');
+            },
           );
         }
 
         // Filter chats based on search query if needed
-        final filteredChats = _searchController.text.isEmpty
-            ? chats
-            : chats.where((chat) {
-          // Get the other participant's data and check if name contains search query
-          final otherUserId = chat.participants.firstWhere(
-                (id) => id != userId,
-            orElse: () => '',
-          );
-          final userAsync = ref.read(userByIdProvider(otherUserId));
-          if (userAsync.hasValue && userAsync.value != null) {
-            return userAsync.value!.name.toLowerCase().contains(
-                _searchController.text.toLowerCase()
-            );
-          }
-          return false;
-        }).toList();
+        final filteredChats =
+            _searchController.text.isEmpty
+                ? chats
+                : chats.where((chat) {
+                  // Get the other participant's data and check if name contains search query
+                  final otherUserId = chat.participants.firstWhere(
+                    (id) => id != userId,
+                    orElse: () => '',
+                  );
+                  final userAsync = ref.read(userByIdProvider(otherUserId));
+                  if (userAsync.hasValue && userAsync.value != null) {
+                    return userAsync.value!.name.toLowerCase().contains(
+                      _searchController.text.toLowerCase(),
+                    );
+                  }
+                  return false;
+                }).toList();
 
         if (filteredChats.isEmpty) {
           return Center(
@@ -185,19 +202,20 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text(
-          'Error loading direct messages: $error',
-          style: const TextStyle(color: Colors.red),
-        ),
-      ),
+      error:
+          (error, _) => Center(
+            child: Text(
+              'Error loading direct messages: $error',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
     );
   }
 
   Widget _buildDirectChatItem(DirectMessageChat chat, String currentUserId) {
     // Find the other participant's ID
     final otherUserId = chat.participants.firstWhere(
-          (id) => id != currentUserId,
+      (id) => id != currentUserId,
       orElse: () => '',
     );
 
@@ -218,26 +236,29 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
             Navigator.pushNamed(
               context,
               '/direct-chat',
-              arguments: {
-                'chatId': chat.chatId,
-                'otherUserId': otherUserId,
-              },
+              arguments: {'chatId': chat.chatId, 'otherUserId': otherUserId},
             );
 
             // Mark as read if needed
             if (isUnread) {
-              ref.read(userDirectChatsProvider.notifier).markChatAsRead(chat.chatId);
+              ref
+                  .read(userDirectChatsProvider.notifier)
+                  .markChatAsRead(chat.chatId);
             }
           },
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isUnread ? AppColors.secondaryBackground.withOpacity(0.7) : AppColors.secondaryBackground,
+              color:
+                  isUnread
+                      ? AppColors.secondaryBackground.withOpacity(0.7)
+                      : AppColors.secondaryBackground,
               borderRadius: BorderRadius.circular(12),
-              border: isUnread
-                  ? Border.all(color: AppColors.primaryPink, width: 1)
-                  : null,
+              border:
+                  isUnread
+                      ? Border.all(color: AppColors.primaryPink, width: 1)
+                      : null,
             ),
             child: Row(
               children: [
@@ -262,14 +283,20 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
                             otherUser.name,
                             style: TextStyle(
                               color: AppColors.primaryWhite,
-                              fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+                              fontWeight:
+                                  isUnread
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
                               fontSize: 16,
                             ),
                           ),
                           Text(
                             formattedTime,
                             style: TextStyle(
-                              color: isUnread ? AppColors.primaryPink : AppColors.secondaryWhite,
+                              color:
+                                  isUnread
+                                      ? AppColors.primaryPink
+                                      : AppColors.secondaryWhite,
                               fontSize: 12,
                             ),
                           ),
@@ -286,8 +313,14 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: isUnread ? AppColors.primaryWhite : AppColors.secondaryWhite,
-                                fontWeight: isUnread ? FontWeight.bold : FontWeight.normal,
+                                color:
+                                    isUnread
+                                        ? AppColors.primaryWhite
+                                        : AppColors.secondaryWhite,
+                                fontWeight:
+                                    isUnread
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                 fontSize: 14,
                               ),
                             ),
@@ -311,10 +344,11 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
           ),
         );
       },
-      loading: () => const Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Center(child: CircularProgressIndicator()),
-      ),
+      loading:
+          () => const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(child: CircularProgressIndicator()),
+          ),
       error: (_, __) => const SizedBox.shrink(),
     );
   }
@@ -325,34 +359,39 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
     return eventsAsync.when(
       data: (events) {
         // Filter events where the user is a participant (either as host or guest)
-        final participatingEvents = events.where((event) =>
-        event.hostId == userId || event.guestsId.contains(userId)
-        ).toList();
+        final participatingEvents =
+            events
+                .where(
+                  (event) =>
+                      event.hostId == userId || event.guestsId.contains(userId),
+                )
+                .toList();
 
         if (participatingEvents.isEmpty) {
           return _buildEmptyState(
-              'No event chats',
-              'Join or host an event to start chatting',
-              Icons.event_available,
-                  () {
-                // Navigate to explore tab
-                Navigator.pushNamedAndRemoveUntil(
-                  context,
-                  '/home',
-                      (route) => false,
-                );
-              }
+            'No event chats',
+            'Join or host an event to start chatting',
+            Icons.event_available,
+            () {
+              // Navigate to explore tab
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                '/home',
+                (route) => false,
+              );
+            },
           );
         }
 
         // Filter events based on search query if needed
-        final filteredEvents = _searchController.text.isEmpty
-            ? participatingEvents
-            : participatingEvents.where((event) {
-          return event.eventTitle.toLowerCase().contains(
-              _searchController.text.toLowerCase()
-          );
-        }).toList();
+        final filteredEvents =
+            _searchController.text.isEmpty
+                ? participatingEvents
+                : participatingEvents.where((event) {
+                  return event.eventTitle.toLowerCase().contains(
+                    _searchController.text.toLowerCase(),
+                  );
+                }).toList();
 
         if (filteredEvents.isEmpty) {
           return Center(
@@ -364,7 +403,9 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
         }
 
         // Sort by date (most recent first)
-        filteredEvents.sort((a, b) => b.eventDateTime.compareTo(a.eventDateTime));
+        filteredEvents.sort(
+          (a, b) => b.eventDateTime.compareTo(a.eventDateTime),
+        );
 
         return ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -376,29 +417,26 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text(
-          'Error loading events: $error',
-          style: const TextStyle(color: Colors.red),
-        ),
-      ),
+      error:
+          (error, _) => Center(
+            child: Text(
+              'Error loading events: $error',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
     );
   }
 
   Widget _buildEventChatItem(EventModel event, String userId) {
     final unreadCountAsync = ref.watch(
-        unreadMessageCountProvider({'userId': userId, 'eventId': event.eventId})
+      unreadMessageCountProvider({'userId': userId, 'eventId': event.eventId}),
     );
     final hostAsync = ref.watch(userByIdProvider(event.hostId));
 
     return InkWell(
       onTap: () {
         // Navigate to event chat screen
-        Navigator.pushNamed(
-          context,
-          '/chat',
-          arguments: event.eventId,
-        );
+        Navigator.pushNamed(context, '/chat', arguments: event.eventId);
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
@@ -415,17 +453,19 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
               height: 60,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                image: event.venueImages.isNotEmpty
-                    ? DecorationImage(
-                  image: NetworkImage(event.venueImages[0]),
-                  fit: BoxFit.cover,
-                )
-                    : null,
+                image:
+                    event.venueImages.isNotEmpty
+                        ? DecorationImage(
+                          image: NetworkImage(event.venueImages[0]),
+                          fit: BoxFit.cover,
+                        )
+                        : null,
                 color: event.venueImages.isEmpty ? AppColors.grayBorder : null,
               ),
-              child: event.venueImages.isEmpty
-                  ? const Icon(Icons.event, color: AppColors.primaryWhite)
-                  : null,
+              child:
+                  event.venueImages.isEmpty
+                      ? const Icon(Icons.event, color: AppColors.primaryWhite)
+                      : null,
             ),
 
             const SizedBox(width: 16),
@@ -476,25 +516,28 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
                             ),
                           ),
                           hostAsync.when(
-                            data: (host) => Text(
-                              host?.name ?? 'Unknown',
-                              style: const TextStyle(
-                                color: AppColors.primaryWhite,
-                                fontSize: 12,
-                              ),
-                            ),
-                            loading: () => const SizedBox(
-                              width: 50,
-                              height: 12,
-                              child: LinearProgressIndicator(),
-                            ),
-                            error: (_, __) => const Text(
-                              'Unknown',
-                              style: TextStyle(
-                                color: AppColors.primaryWhite,
-                                fontSize: 12,
-                              ),
-                            ),
+                            data:
+                                (host) => Text(
+                                  host?.name ?? 'Unknown',
+                                  style: const TextStyle(
+                                    color: AppColors.primaryWhite,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                            loading:
+                                () => const SizedBox(
+                                  width: 50,
+                                  height: 12,
+                                  child: LinearProgressIndicator(),
+                                ),
+                            error:
+                                (_, __) => const Text(
+                                  'Unknown',
+                                  style: TextStyle(
+                                    color: AppColors.primaryWhite,
+                                    fontSize: 12,
+                                  ),
+                                ),
                           ),
                         ],
                       ),
@@ -539,20 +582,16 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
   }
 
   Widget _buildEmptyState(
-      String title,
-      String subtitle,
-      IconData icon,
-      VoidCallback onActionPressed,
-      ) {
+    String title,
+    String subtitle,
+    IconData icon,
+    VoidCallback onActionPressed,
+  ) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: AppColors.secondaryWhite,
-            size: 64,
-          ),
+          Icon(icon, color: AppColors.secondaryWhite, size: 64),
           const SizedBox(height: 16),
           Text(
             title,
@@ -603,4 +642,5 @@ class _MainChatScreenState extends ConsumerState<MainChatScreen> with SingleTick
     } else {
       return 'now';
     }
-  }}
+  }
+}

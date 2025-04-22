@@ -179,9 +179,10 @@ class EventCard extends ConsumerWidget {
                         ),
                         // Host column
                         Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
+                          padding: const EdgeInsets.only(right: 25.0),
                           child: const Text(
                             'Host',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
                               color: AppColors.secondaryWhite,
                               fontSize: 10.0,
@@ -222,7 +223,7 @@ class EventCard extends ConsumerWidget {
                                   height: 32,
                                   width:
                                       event.guestsId.length < 3
-                                          ? event.guestsId.length * 35
+                                          ? event.guestsId.length * 50
                                           : 100,
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
